@@ -18,6 +18,9 @@ public class Configuration {
     @Value("${hub.notification.rootOrg}")
     private String hubRootOrg;
 
+    @Value("${discussion.create.targetUrl}")
+    private String discussionCreateUrl;
+
     public String getNotifyServiceHost() {
         return notifyServiceHost;
     }
@@ -32,5 +35,9 @@ public class Configuration {
 
     public String getHubRootOrg() {
         return hubRootOrg;
+    }
+
+    public String getDiscussionCreateUrl() {
+        return discussionCreateUrl;
     }
 }

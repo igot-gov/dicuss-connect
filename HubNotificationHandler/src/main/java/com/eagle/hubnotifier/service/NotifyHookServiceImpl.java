@@ -52,6 +52,12 @@ public class NotifyHookServiceImpl implements NotifyHookService {
     @Override
     public void handleNotifyKafkaTopicRequest(Map<String, Object> data) {
         logger.info("Recived request from Topic Consumer");
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            logger.info("Received Data : {}", mapper.writeValueAsString(data));
+        } catch (JsonProcessingException ex) {
+            logger.error("Not able to parse the data", ex);
+        }
         List<String> hookList = (List<String>) data.get("hook");
         if (hookList != null) {
             for (String hook : hookList) {
@@ -69,16 +75,25 @@ public class NotifyHookServiceImpl implements NotifyHookService {
         }
     }
 
+    /**
+     * Send the notification on creating the topic
+     *
+     * @param data
+     */
+    @SuppressWarnings("unchecked")
     private void handleTopicCreate(Map<String, Object> data) {
         logger.info("Received Topic Creation Event");
         NotificationEvent nEvent = new NotificationEvent();
-        nEvent.setEventId("discussion_creation");
+        nEvent.setEventId(Constants.DISCUSSION_CREATION_EVENT_ID);
         Map<String, Object> tagValues = new HashMap<String, Object>();
-        @SuppressWarnings("unchecked")
-        List<String> topicTitleList = (List<String>) data.get("params[topic][title]");
-        tagValues.put("#discussionTopic", topicTitleList.get(0));
+        List<String> topicTitleList = (List<String>) data.get(Constants.PARAM_TOPIC_TITLE_CONSTANT);
+        tagValues.put(Constants.DISCUSSION_CREATION_TOPIC_TAG, topicTitleList.get(0));
+        List<String> topicIds = (List<String>) data.get(Constants.PARAM_TOPIC_TID_CONSTANT);
+        tagValues.put(Constants.DISCUSSION_CREATION_TARGET_URL, configuration.getDiscussionCreateUrl() + topicIds.get(0));
+        List<String> topicUids = (List<String>) data.get(Constants.PARAM_TOPIC_UID_CONSTANT);
+        HubUser user = userRepository.findByKey(Constants.USER_ROLE + ":" + topicUids.get(0));
         Map<String, List<String>> recipients = new HashMap<String, List<String>>();
-        recipients.put("author", Arrays.asList("wid1,wid2"));
+        recipients.put(Constants.AUTHOR_ROLE, Arrays.asList(user.getUsername()));
         nEvent.setTagValues(tagValues);
         nEvent.setRecipients(recipients);
         notifyHandler.sendNotification(nEvent);
@@ -107,7 +122,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
         if (topicFollower != null) {
             for (String uid : topicFollower.getMembers()) {
                 logger.info("Fetching User details for UID - {}", uid);
-                String userKey = "user:" + uid;
+                String userKey = Constants.USER_ROLE + ":" + uid;
                 HubUser user = userRepository.findByKey(userKey);
                 if (user != null) {
                     listeners.add(user.getUsername());
