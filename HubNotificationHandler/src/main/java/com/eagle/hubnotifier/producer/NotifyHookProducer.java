@@ -14,7 +14,7 @@ public class NotifyHookProducer {
 	@Autowired
 	private KafkaTemplate<String, Object> kafkaTemplate;
 
-	public void push(Object value) {
+	public void push(String topic, Object value) {
 		kafkaTemplate.send(topic, value);
 	}
 }

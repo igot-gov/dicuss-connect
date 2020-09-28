@@ -6,17 +6,31 @@ import org.springframework.stereotype.Component;
 @Component
 public class Configuration {
 
-	@Value("${notify.service.host}")
-	private String notifyServiceHost;
+    @Value("${notify.service.host}")
+    private String notifyServiceHost;
 
-	@Value("${notify.service.path}")
-	private String notifyServicePath;
+    @Value("${notify.service.path}")
+    private String notifyServicePath;
 
-	public String getNotifyServiceHost() {
-		return notifyServiceHost;
-	}
-	
-	public String getNotifyServicePath() {
-		return notifyServicePath;
-	}
+    @Value("${kafka.topics.incoming.notify}")
+    private String notifyTopic;
+
+    @Value("${hub.notification.rootOrg}")
+    private String hubRootOrg;
+
+    public String getNotifyServiceHost() {
+        return notifyServiceHost;
+    }
+
+    public String getNotifyServicePath() {
+        return notifyServicePath;
+    }
+
+    public String getNotifyTopic() {
+        return notifyTopic;
+    }
+
+    public String getHubRootOrg() {
+        return hubRootOrg;
+    }
 }

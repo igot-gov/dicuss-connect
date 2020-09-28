@@ -36,6 +36,6 @@ public class HubNotificationController {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 		notifyService.handleNotifiyRestRequest(mapper.convertValue(paramMap, Map.class));
-		return new ResponseEntity<>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.ACCEPTED);
 	}
 }
