@@ -10,9 +10,9 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.eagle</groupId>
-	<artifactId>HubNotificationService</artifactId>
+	<artifactId>hub-notification-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>HubNotificationService</name>
+	<name>hub-notification-service</name>
 	<description>Hu Notification Service</description>
 
 	<properties>
