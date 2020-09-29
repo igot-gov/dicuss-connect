@@ -16,6 +16,8 @@ public class PostData {
 
     private Long downvotes;
 
+    private Long pid;
+
     public Long getTid() {
         return tid;
     }
@@ -63,4 +65,8 @@ public class PostData {
     public void setDownvotes(Long downvotes) {
         this.downvotes = downvotes;
     }
+
+    public Long getPid() {return pid;}
+
+    public void setPid(Long pid) {this.pid = pid;}
 }

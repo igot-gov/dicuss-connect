@@ -13,6 +13,10 @@ public class Constants {
 
     public static final String FILTER_TOPIC_REPLY = "filter:topic.reply";
 
+    public static final String ACTION_POST_UPVOTE = "action:post.upvote";
+
+    public static final String ACTION_POST_DOWNVOTE = "action:post.downvote";
+
     public static final String DISCUSSION_CREATION_EVENT_ID = "discussion_creation";
 
     public static final String DISCUSSION_CREATION_TOPIC_TAG = "#discussionTopic";
@@ -31,6 +35,8 @@ public class Constants {
 
     public static final String USER_ROLE = "user";
 
+    public static final String POST_ROLE = "post";
+
     public static final String PARAM_TOPIC_TITLE_CONSTANT = "params[topic][title]";
 
     public static final String PARAM_TOPIC_TID_CONSTANT = "params[topic][tid]";
@@ -42,5 +48,24 @@ public class Constants {
     public static final String PARAM_UID= "params[uid]";
 
     public static final String PARAM_TID= "params[tid]";
+
+    public static final String PARAM_OWNER = "params[owner]";
+
+    public static final String DISCUSSION_UPVOTE_EVENT = "discussion_upvote_event";
+
+    public static final String PARAMS_PID = "params[pid]";
+
+    public static final String UPVOTED_BY_NAME = "#upvotedByName";
+
+    public static final String UPVOTED_BY = "upvotedBy";
+
+    public static final String DISCUSSION_DOWNVOTE_EVENT = "discussion_downvote_event";
+
+    public static final String DOWNVOTE_BY_NAME = "#downvotedByName";
+
+    public static final String DOWNVOTE_BY = "downvotedBy";
+
+
+
 
 }

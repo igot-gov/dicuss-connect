@@ -22,7 +22,7 @@ public class HubUser {
 	private String username;
 
 	@Field("uid")
-	private Integer uid;
+	private Long uid;
 
 	public ObjectId getId() {
 		return id;
@@ -56,11 +56,11 @@ public class HubUser {
 		this.username = username;
 	}
 
-	public Integer getUid() {
+	public Long getUid() {
 		return uid;
 	}
 
-	public void setUid(Integer uid) {
+	public void setUid(Long uid) {
 		this.uid = uid;
 	}
 	

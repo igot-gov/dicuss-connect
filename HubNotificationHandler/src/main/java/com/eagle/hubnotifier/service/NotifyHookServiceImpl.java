@@ -1,26 +1,22 @@
 package com.eagle.hubnotifier.service;
 
-import java.util.*;
-
 import com.eagle.hubnotifier.config.Configuration;
-import com.eagle.hubnotifier.model.TopicData;
+import com.eagle.hubnotifier.model.*;
+import com.eagle.hubnotifier.producer.NotifyHookProducer;
+import com.eagle.hubnotifier.repository.HubPostRepository;
+import com.eagle.hubnotifier.repository.HubUserRepository;
+import com.eagle.hubnotifier.repository.TopicFollowerRepository;
 import com.eagle.hubnotifier.util.Constants;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.eagle.hubnotifier.model.HubUser;
-import com.eagle.hubnotifier.model.NotificationEvent;
-import com.eagle.hubnotifier.model.TopicFollower;
-import com.eagle.hubnotifier.producer.NotifyHookProducer;
-import com.eagle.hubnotifier.repository.HubUserRepository;
-import com.eagle.hubnotifier.repository.TopicFollowerRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class NotifyHookServiceImpl implements NotifyHookService {
@@ -43,6 +39,9 @@ public class NotifyHookServiceImpl implements NotifyHookService {
 
     @Autowired
     private OutboundRequestHandlerServiceImpl requestHandlerService;
+
+    @Autowired
+    private HubPostRepository hubPostRepository;
 
     @Override
     public void handleNotifiyRestRequest(Map<String, Object> data) {
@@ -68,11 +67,17 @@ public class NotifyHookServiceImpl implements NotifyHookService {
                     case Constants.FILTER_TOPIC_CREATE:
                         handleTopicCreate(data);
                         break;
-                    case Constants.FILTER_POST_CREATE:
-                        handlePostCreate(data);
-                        break;
+//                    case Constants.FILTER_POST_CREATE:
+//                        handlePostCreate(data);
+//                        break;
                     case Constants.FILTER_TOPIC_REPLY:
                         handleTopicReplyEvent(data);
+                        break;
+                    case Constants.ACTION_POST_UPVOTE:
+                        handleTopicUpvoteEvent(data);
+                        break;
+                    case Constants.ACTION_POST_DOWNVOTE:
+                        handleTopicDownVoteEvent(data);
                         break;
                     default:
                         break;
@@ -106,7 +111,8 @@ public class NotifyHookServiceImpl implements NotifyHookService {
     }
 
     /**
-     *Handle Post Create Request
+     * Handle Post Create Request
+     *
      * @param data
      */
     private void handlePostCreate(Map<String, Object> data) {
@@ -148,6 +154,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
 
     /**
      * Handle the topic reply event and send the notification on replying on the topic
+     *
      * @param data
      */
     private void handleTopicReplyEvent(Map<String, Object> data) {
@@ -159,11 +166,11 @@ public class NotifyHookServiceImpl implements NotifyHookService {
         List<String> repliedByUuids = (List<String>) data.get(Constants.PARAM_UID);
         HubUser repliedByUser = userRepository.findByKey(Constants.USER_ROLE + ":" + repliedByUuids.get(0));
         tagValues.put(Constants.COMMENTED_BY_NAME_TAG, repliedByUser.getUsername());
-        List<String> topicIds = (List<String>)data.get(Constants.PARAM_TID);
+        List<String> topicIds = (List<String>) data.get(Constants.PARAM_TID);
         tagValues.put(Constants.DISCUSSION_CREATION_TARGET_URL, configuration.getDiscussionCreateUrl() + topicIds.get(0));
         Map<String, List<String>> recipients = new HashMap<String, List<String>>();
         TopicData topicData = getTopicData(topicIds.get(0));
-        if(!ObjectUtils.isEmpty(topicData)){
+        if (!ObjectUtils.isEmpty(topicData)) {
             tagValues.put(Constants.DISCUSSION_CREATION_TOPIC_TAG, topicData.getTitle());
             HubUser author = userRepository.findByKey(Constants.USER_ROLE + ":" + topicData.getUid());
             recipients.put(Constants.AUTHOR_ROLE, Arrays.asList(author.getUsername()));
@@ -176,6 +183,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
 
     /**
      * Get topic data based on topic id
+     *
      * @param topicId
      * @return Topic data
      */
@@ -186,11 +194,63 @@ public class NotifyHookServiceImpl implements NotifyHookService {
         String topicSearchPath = configuration.getTopicSearchPath().replace("{topicId}", topicId);
         builder.append(configuration.getHubServiceHost()).append(configuration.getHubServiceGetPath()).append(topicSearchPath);
         try {
-           Object response =  requestHandlerService.fetchResult(builder);
-           topicData = mapper.convertValue(response, TopicData.class);
+            Object response = requestHandlerService.fetchResult(builder);
+            topicData = mapper.convertValue(response, TopicData.class);
         } catch (Exception e) {
             logger.error("Error while searching topic :", e);
         }
         return topicData;
+    }
+
+    /**
+     * Send the notification on upvote Event
+     *
+     * @param data
+     */
+    private void handleTopicUpvoteEvent(Map<String, Object> data) {
+        NotificationEvent nEvent = new NotificationEvent();
+        nEvent.setEventId(Constants.DISCUSSION_UPVOTE_EVENT);
+        Map<String, Object> tagValues = new HashMap<String, Object>();
+        List<String> postIds = (List<String>) data.get(Constants.PARAMS_PID);
+        HubPost hubPost = hubPostRepository.findByKey(Constants.POST_ROLE + ":" + postIds.get(0));
+        tagValues.put(Constants.COMMENT_TAG, hubPost.getContent());
+        List<String> upvotedByUuids = (List<String>) data.get(Constants.PARAM_UID);
+        List<HubUser> userList = userRepository.findByUUIDS(Arrays.asList(Constants.USER_ROLE + ":" + upvotedByUuids.get(0), Constants.USER_ROLE + ":" + hubPost.getUid()));
+        Map<String, HubUser> hubUserMap = userList.stream().collect(Collectors.toMap(HubUser::getKey, HubUser -> HubUser));
+        tagValues.put(Constants.UPVOTED_BY_NAME, hubUserMap.get(Constants.USER_ROLE + ":" + upvotedByUuids.get(0)).getUsername());
+        List<String> topicIds = (List<String>) data.get(Constants.PARAM_TID);
+        tagValues.put(Constants.DISCUSSION_CREATION_TARGET_URL, configuration.getDiscussionCreateUrl() + hubPost.getTid());
+        Map<String, List<String>> recipients = new HashMap<String, List<String>>();
+        recipients.put(Constants.AUTHOR_ROLE, Arrays.asList(hubUserMap.get(Constants.USER_ROLE + ":" + hubPost.getUid()).getUsername()));
+        recipients.put(Constants.UPVOTED_BY, Arrays.asList(hubUserMap.get(Constants.USER_ROLE + ":" + upvotedByUuids.get(0)).getUsername()));
+        nEvent.setTagValues(tagValues);
+        nEvent.setRecipients(recipients);
+        notifyHandler.sendNotification(nEvent);
+    }
+
+    /**
+     * Send the notification on downvote Event
+     *
+     * @param data
+     */
+    private void handleTopicDownVoteEvent(Map<String, Object> data) {
+        NotificationEvent nEvent = new NotificationEvent();
+        nEvent.setEventId(Constants.DISCUSSION_DOWNVOTE_EVENT);
+        Map<String, Object> tagValues = new HashMap<String, Object>();
+        List<String> postIds = (List<String>) data.get(Constants.PARAMS_PID);
+        HubPost hubPost = hubPostRepository.findByKey(Constants.POST_ROLE + ":" + postIds.get(0));
+        tagValues.put(Constants.COMMENT_TAG, hubPost.getContent());
+        List<String> downvotedByUuids = (List<String>) data.get(Constants.PARAM_UID);
+        List<HubUser> userList = userRepository.findByUUIDS(Arrays.asList(Constants.USER_ROLE + ":" + downvotedByUuids.get(0), Constants.USER_ROLE + ":" + hubPost.getUid()));
+        Map<String, HubUser> hubUserMap = userList.stream().collect(Collectors.toMap(HubUser::getKey, HubUser -> HubUser));
+        tagValues.put(Constants.DOWNVOTE_BY_NAME, hubUserMap.get(Constants.USER_ROLE + ":" + downvotedByUuids.get(0)).getUsername());
+        List<String> topicIds = (List<String>) data.get(Constants.PARAM_TID);
+        tagValues.put(Constants.DISCUSSION_CREATION_TARGET_URL, configuration.getDiscussionCreateUrl() + hubPost.getTid());
+        Map<String, List<String>> recipients = new HashMap<String, List<String>>();
+        recipients.put(Constants.AUTHOR_ROLE, Arrays.asList(hubUserMap.get(Constants.USER_ROLE + ":" + hubPost.getUid()).getUsername()));
+        recipients.put(Constants.DOWNVOTE_BY, Arrays.asList(hubUserMap.get(Constants.USER_ROLE + ":" + downvotedByUuids.get(0)).getUsername()));
+        nEvent.setTagValues(tagValues);
+        nEvent.setRecipients(recipients);
+        notifyHandler.sendNotification(nEvent);
     }
 }
