@@ -10,10 +10,10 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.eagle</groupId>
-	<artifactId>HubNotificationHandler</artifactId>
-	<version>1.0.0</version>
-	<name>NodeBBHandler</name>
-	<description>Demo project for Spring Boot</description>
+	<artifactId>hub-notification-service</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>hub-notification-service</name>
+	<description>Hu Notification Service</description>
 
 	<properties>
 		<java.version>1.8</java.version>
