@@ -17,7 +17,6 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
-@CrossOrigin(origins = "*")
 @RequestMapping("/v1/")
 public class HubNotificationController {
 	Logger logger = LogManager.getLogger(HubNotificationController.class);
@@ -28,7 +27,7 @@ public class HubNotificationController {
 	@SuppressWarnings("unchecked")
 	@PostMapping(value = "/handleNotification", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = {
 			MediaType.APPLICATION_ATOM_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<HttpStatus> getUsersCoin(@RequestParam MultiValueMap<String, String> paramMap){
+	public ResponseEntity<HttpStatus> handleHubNotification(@RequestParam MultiValueMap<String, String> paramMap){
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 		notifyService.handleNotifiyRestRequest(mapper.convertValue(paramMap, Map.class));
