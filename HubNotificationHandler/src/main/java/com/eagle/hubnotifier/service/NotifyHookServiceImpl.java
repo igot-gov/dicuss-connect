@@ -1,12 +1,9 @@
 package com.eagle.hubnotifier.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.eagle.hubnotifier.config.Configuration;
+import com.eagle.hubnotifier.model.TopicData;
 import com.eagle.hubnotifier.util.Constants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,6 +18,9 @@ import com.eagle.hubnotifier.repository.HubUserRepository;
 import com.eagle.hubnotifier.repository.TopicFollowerRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 @Service
 public class NotifyHookServiceImpl implements NotifyHookService {
@@ -40,6 +40,9 @@ public class NotifyHookServiceImpl implements NotifyHookService {
 
     @Autowired
     private Configuration configuration;
+
+    @Autowired
+    private OutboundRequestHandlerServiceImpl requestHandlerService;
 
     @Override
     public void handleNotifiyRestRequest(Map<String, Object> data) {
@@ -67,6 +70,9 @@ public class NotifyHookServiceImpl implements NotifyHookService {
                         break;
                     case Constants.FILTER_POST_CREATE:
                         handlePostCreate(data);
+                        break;
+                    case Constants.FILTER_TOPIC_REPLY:
+                        handleTopicReplyEvent(data);
                         break;
                     default:
                         break;
@@ -99,6 +105,10 @@ public class NotifyHookServiceImpl implements NotifyHookService {
         notifyHandler.sendNotification(nEvent);
     }
 
+    /**
+     *Handle Post Create Request
+     * @param data
+     */
     private void handlePostCreate(Map<String, Object> data) {
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -134,5 +144,53 @@ public class NotifyHookServiceImpl implements NotifyHookService {
         recipients.put("listeners", listeners);
 
         //TODO -- Construct the nEvent object and send request to NotificationService.
+    }
+
+    /**
+     * Handle the topic reply event and send the notification on replying on the topic
+     * @param data
+     */
+    private void handleTopicReplyEvent(Map<String, Object> data) {
+        NotificationEvent nEvent = new NotificationEvent();
+        nEvent.setEventId(Constants.DISCUSSION_REPLY_EVENT_ID);
+        Map<String, Object> tagValues = new HashMap<String, Object>();
+        List<String> commentList = (List<String>) data.get(Constants.PARAM_CONTENT_CONSTANT);
+        tagValues.put(Constants.COMMENT_TAG, commentList.get(0));
+        List<String> repliedByUuids = (List<String>) data.get(Constants.PARAM_UID);
+        HubUser repliedByUser = userRepository.findByKey(Constants.USER_ROLE + ":" + repliedByUuids.get(0));
+        tagValues.put(Constants.COMMENTED_BY_NAME_TAG, repliedByUser.getUsername());
+        List<String> topicIds = (List<String>)data.get(Constants.PARAM_TID);
+        tagValues.put(Constants.DISCUSSION_CREATION_TARGET_URL, configuration.getDiscussionCreateUrl() + topicIds.get(0));
+        Map<String, List<String>> recipients = new HashMap<String, List<String>>();
+        TopicData topicData = getTopicData(topicIds.get(0));
+        if(!ObjectUtils.isEmpty(topicData)){
+            tagValues.put(Constants.DISCUSSION_CREATION_TOPIC_TAG, topicData.getTitle());
+            HubUser author = userRepository.findByKey(Constants.USER_ROLE + ":" + topicData.getUid());
+            recipients.put(Constants.AUTHOR_ROLE, Arrays.asList(author.getUsername()));
+        }
+        recipients.put(Constants.COMMENTED_BY_TAG, Arrays.asList(repliedByUser.getUsername()));
+        nEvent.setTagValues(tagValues);
+        nEvent.setRecipients(recipients);
+        notifyHandler.sendNotification(nEvent);
+    }
+
+    /**
+     * Get topic data based on topic id
+     * @param topicId
+     * @return Topic data
+     */
+    private TopicData getTopicData(String topicId) {
+        StringBuilder builder = new StringBuilder();
+        ObjectMapper mapper = new ObjectMapper();
+        TopicData topicData = null;
+        String topicSearchPath = configuration.getTopicSearchPath().replace("{topicId}", topicId);
+        builder.append(configuration.getHubServiceHost()).append(configuration.getHubServiceGetPath()).append(topicSearchPath);
+        try {
+           Object response =  requestHandlerService.fetchResult(builder);
+           topicData = mapper.convertValue(response, TopicData.class);
+        } catch (Exception e) {
+            logger.error("Error while searching topic :", e);
+        }
+        return topicData;
     }
 }

@@ -21,6 +21,15 @@ public class Configuration {
     @Value("${discussion.create.targetUrl}")
     private String discussionCreateUrl;
 
+    @Value("${hub.service.topic.path}")
+    private String topicSearchPath;
+
+    @Value("${hub.service.host}")
+    private String hubServiceHost;
+
+    @Value("${hub.service.get.path}")
+    private String hubServiceGetPath;
+
     public String getNotifyServiceHost() {
         return notifyServiceHost;
     }
@@ -37,7 +46,12 @@ public class Configuration {
         return hubRootOrg;
     }
 
-    public String getDiscussionCreateUrl() {
-        return discussionCreateUrl;
-    }
+    public String getHubServiceHost() {return hubServiceHost;}
+
+    public String getDiscussionCreateUrl() {return discussionCreateUrl;}
+
+    public String getHubServiceGetPath() {return hubServiceGetPath;}
+
+    public String getTopicSearchPath() {return topicSearchPath;}
+
 }
