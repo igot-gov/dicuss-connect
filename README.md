@@ -1,1 +1,1 @@
-# dicuss-connect
+# discuss-connect
