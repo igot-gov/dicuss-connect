@@ -12,8 +12,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class HashMapSerializer implements Serializer<Map<String, ?>> {
 	Logger logger = LogManager.getLogger(HashMapSerializer.class);
 
+
 	@Override
 	public void configure(Map<String, ?> configs, boolean isKey) {
+		// Do nothing.
 	}
 
 	@Override
@@ -30,5 +32,8 @@ public class HashMapSerializer implements Serializer<Map<String, ?>> {
 
 	@Override
 	public void close() {
+		// Do nothing.
 	}
+
+
 }

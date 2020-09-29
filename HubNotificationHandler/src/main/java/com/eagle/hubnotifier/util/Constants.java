@@ -1,10 +1,9 @@
 package com.eagle.hubnotifier.util;
 
 public class Constants {
-
-    //	public interface BeanContainerFactory {
+    private Constants() { }
     public static final String INCOMING_KAFKA_LISTENER = "incomingKafkaListenerContainerFactory";
-    //	}
+
     public static final String ROOT_ORG_CONSTANT = "rootOrg";
 
     public static final String FILTER_TOPIC_CREATE = "filter:topic.create";

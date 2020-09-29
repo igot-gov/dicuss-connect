@@ -9,11 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.eagle.hubnotifier.service.NotifyHookService;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -30,9 +26,9 @@ public class HubNotificationController {
 	private NotifyHookService notifyService;
 
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/handleNotification", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = {
+	@PostMapping(value = "/handleNotification", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = {
 			MediaType.APPLICATION_ATOM_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<?> getUsersCoin(@RequestParam MultiValueMap<String, String> paramMap) throws Exception {
+	public ResponseEntity<HttpStatus> getUsersCoin(@RequestParam MultiValueMap<String, String> paramMap){
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 		notifyService.handleNotifiyRestRequest(mapper.convertValue(paramMap, Map.class));

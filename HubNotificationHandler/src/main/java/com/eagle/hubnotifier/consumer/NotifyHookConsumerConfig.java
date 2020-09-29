@@ -28,7 +28,7 @@ public class NotifyHookConsumerConfig {
 
 	public ConsumerFactory<String, Map> kafkaConsumerFactory() {
 		JsonDeserializer<Map> deserializer = new JsonDeserializer<>(Map.class);
-		// deserializer.setRemoveTypeHeaders(false);
+		
 		deserializer.addTrustedPackages("*");
 		deserializer.setUseTypeMapperForKey(true);
 
