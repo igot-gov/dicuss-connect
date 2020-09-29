@@ -12,7 +12,7 @@
 	<groupId>com.eagle</groupId>
 	<artifactId>HubNotificationHandler</artifactId>
 	<version>1.0.0</version>
-	<name>NodeBBHandler</name>
+	<name>HubNotificationService</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
