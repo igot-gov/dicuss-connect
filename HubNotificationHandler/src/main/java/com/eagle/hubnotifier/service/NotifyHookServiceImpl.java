@@ -196,7 +196,9 @@ public class NotifyHookServiceImpl implements NotifyHookService {
         nEvent.setEventId(Constants.DISCUSSION_UPVOTE_EVENT);
         Map<String, Object> tagValues = new HashMap<>();
         List<String> postIds = (List<String>) data.get(Constants.PARAMS_PID);
+        logger.info("Trying to hit the mongo repo.......");
         HubPost hubPost = hubPostRepository.findByKey(Constants.POST_ROLE + ":" + postIds.get(0));
+        logger.info("Mongo repo invocation completed.......");
         tagValues.put(Constants.COMMENT_TAG, hubPost.getContent());
         List<String> upvotedByUuids = (List<String>) data.get(Constants.PARAM_UID);
         List<HubUser> userList = userRepository.findByUUIDS(Arrays.asList(Constants.USER_ROLE + ":" + upvotedByUuids.get(0), Constants.USER_ROLE + ":" + hubPost.getUid()));
