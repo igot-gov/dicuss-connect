@@ -64,6 +64,8 @@ public class Constants {
 
     public static final String DOWNVOTE_BY = "downvotedBy";
 
+    public static final String TOPIC_VALUE_CONSTANTS = "topic";
+
 
 
 

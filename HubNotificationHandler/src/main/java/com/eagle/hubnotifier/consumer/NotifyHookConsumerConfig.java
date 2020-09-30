@@ -20,28 +20,28 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 @EnableKafka
 public class NotifyHookConsumerConfig {
 
-	@Value("${spring.kafka.bootstrap.servers}")
-	private String serverConfig;
-
-	@Value("${kafka.consumer.config.group_id}")
-	private String groupId;
-
-	public ConsumerFactory<String, Map> kafkaConsumerFactory() {
-		JsonDeserializer<Map> deserializer = new JsonDeserializer<>(Map.class);
-		
-		deserializer.addTrustedPackages("*");
-		deserializer.setUseTypeMapperForKey(true);
-
-		Map<String, Object> props = new HashMap<>();
-		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, serverConfig);
-		props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-		return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
-	}
-
-	@Bean
-	public ConcurrentKafkaListenerContainerFactory<String, Map> incomingKafkaListenerContainerFactory() {
-		ConcurrentKafkaListenerContainerFactory<String, Map> factory = new ConcurrentKafkaListenerContainerFactory<>();
-		factory.setConsumerFactory(kafkaConsumerFactory());
-		return factory;
-	}
+//	@Value("${spring.kafka.bootstrap.servers}")
+//	private String serverConfig;
+//
+//	@Value("${kafka.consumer.config.group_id}")
+//	private String groupId;
+//
+//	public ConsumerFactory<String, Map> kafkaConsumerFactory() {
+//		JsonDeserializer<Map> deserializer = new JsonDeserializer<>(Map.class);
+//
+//		deserializer.addTrustedPackages("*");
+//		deserializer.setUseTypeMapperForKey(true);
+//
+//		Map<String, Object> props = new HashMap<>();
+//		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, serverConfig);
+//		props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+//		return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
+//	}
+//
+//	@Bean
+//	public ConcurrentKafkaListenerContainerFactory<String, Map> incomingKafkaListenerContainerFactory() {
+//		ConcurrentKafkaListenerContainerFactory<String, Map> factory = new ConcurrentKafkaListenerContainerFactory<>();
+//		factory.setConsumerFactory(kafkaConsumerFactory());
+//		return factory;
+//	}
 }

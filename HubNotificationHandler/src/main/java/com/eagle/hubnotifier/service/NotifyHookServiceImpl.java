@@ -4,6 +4,7 @@ import com.eagle.hubnotifier.config.Configuration;
 import com.eagle.hubnotifier.model.*;
 import com.eagle.hubnotifier.producer.NotifyHookProducer;
 import com.eagle.hubnotifier.repository.HubPostRepository;
+import com.eagle.hubnotifier.repository.HubTopicRepository;
 import com.eagle.hubnotifier.repository.HubUserRepository;
 import com.eagle.hubnotifier.repository.TopicFollowerRepository;
 import com.eagle.hubnotifier.util.Constants;
@@ -42,6 +43,9 @@ public class NotifyHookServiceImpl implements NotifyHookService {
 
     @Autowired
     private HubPostRepository hubPostRepository;
+
+    @Autowired
+    private HubTopicRepository hubTopicRepository;
 
     @Override
     public void handleNotifiyRestRequest(Map<String, Object> data) {
@@ -170,7 +174,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
         List<String> topicIds = (List<String>) data.get(Constants.PARAM_TID);
         tagValues.put(Constants.DISCUSSION_CREATION_TARGET_URL, configuration.getDiscussionCreateUrl() + topicIds.get(0));
         Map<String, List<String>> recipients = new HashMap<>();
-        TopicData topicData = getTopicData(topicIds.get(0));
+        HubTopic topicData = hubTopicRepository.findByKey(Constants.TOPIC_VALUE_CONSTANTS+":"+topicIds.get(0));
         if (!ObjectUtils.isEmpty(topicData)) {
             tagValues.put(Constants.DISCUSSION_CREATION_TOPIC_TAG, topicData.getTitle());
             HubUser author = userRepository.findByKey(Constants.USER_ROLE + ":" + topicData.getUid());
@@ -180,27 +184,6 @@ public class NotifyHookServiceImpl implements NotifyHookService {
         nEvent.setTagValues(tagValues);
         nEvent.setRecipients(recipients);
         notifyHandler.sendNotification(nEvent);
-    }
-
-    /**
-     * Get topic data based on topic id
-     *
-     * @param topicId
-     * @return Topic data
-     */
-    private TopicData getTopicData(String topicId) {
-        StringBuilder builder = new StringBuilder();
-        ObjectMapper mapper = new ObjectMapper();
-        TopicData topicData = null;
-        String topicSearchPath = configuration.getTopicSearchPath().replace("{topicId}", topicId);
-        builder.append(configuration.getHubServiceHost()).append(configuration.getHubServiceGetPath()).append(topicSearchPath);
-        try {
-            Object response = requestHandlerService.fetchResult(builder);
-            topicData = mapper.convertValue(response, TopicData.class);
-        } catch (Exception e) {
-            logger.error("Error while searching topic :", e);
-        }
-        return topicData;
     }
 
     /**

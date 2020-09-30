@@ -1,5 +1,7 @@
 package com.eagle.hubnotifier.producer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -10,11 +12,17 @@ public class NotifyHookProducer {
 
 	@Value("${kafka.topics.incoming.notify}")
 	private String topic;
-	
+
 	@Autowired
-	private KafkaTemplate<String, Object> kafkaTemplate;
+	KafkaTemplate<String, String> kafkaTemplate;
 
 	public void push(String topic, Object value) {
-		kafkaTemplate.send(topic, value);
+		ObjectMapper mapper = new ObjectMapper();
+		String message = null;
+		try {
+			message = mapper.writeValueAsString(value);
+			kafkaTemplate.send(topic, message);
+		} catch (JsonProcessingException e) {
+		}
 	}
 }
