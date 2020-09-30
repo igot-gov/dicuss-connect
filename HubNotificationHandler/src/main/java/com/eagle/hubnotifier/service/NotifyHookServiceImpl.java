@@ -202,6 +202,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
         tagValues.put(Constants.COMMENT_TAG, hubPost.getContent());
         List<String> upvotedByUuids = (List<String>) data.get(Constants.PARAM_UID);
         List<HubUser> userList = userRepository.findByUUIDS(Arrays.asList(Constants.USER_ROLE + ":" + upvotedByUuids.get(0), Constants.USER_ROLE + ":" + hubPost.getUid()));
+        logger.info("Getting user list.......");
         Map<String, HubUser> hubUserMap = userList.stream().collect(Collectors.toMap(HubUser::getKey, hubUser -> hubUser));
         tagValues.put(Constants.UPVOTED_BY_NAME, hubUserMap.get(Constants.USER_ROLE + ":" + upvotedByUuids.get(0)).getUsername());
         tagValues.put(Constants.DISCUSSION_CREATION_TARGET_URL, configuration.getDiscussionCreateUrl() + hubPost.getTid());
@@ -210,6 +211,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
         recipients.put(Constants.UPVOTED_BY, Arrays.asList(hubUserMap.get(Constants.USER_ROLE + ":" + upvotedByUuids.get(0)).getUsername()));
         nEvent.setTagValues(tagValues);
         nEvent.setRecipients(recipients);
+        logger.info("Event prepared");
         notifyHandler.sendNotification(nEvent);
     }
 
@@ -227,6 +229,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
         tagValues.put(Constants.COMMENT_TAG, hubPost.getContent());
         List<String> downvotedByUuids = (List<String>) data.get(Constants.PARAM_UID);
         List<HubUser> userList = userRepository.findByUUIDS(Arrays.asList(Constants.USER_ROLE + ":" + downvotedByUuids.get(0), Constants.USER_ROLE + ":" + hubPost.getUid()));
+        logger.info("Getting user list.......");
         Map<String, HubUser> hubUserMap = userList.stream().collect(Collectors.toMap(HubUser::getKey, hubUser -> hubUser));
         tagValues.put(Constants.DOWNVOTE_BY_NAME, hubUserMap.get(Constants.USER_ROLE + ":" + downvotedByUuids.get(0)).getUsername());
         tagValues.put(Constants.DISCUSSION_CREATION_TARGET_URL, configuration.getDiscussionCreateUrl() + hubPost.getTid());
@@ -235,6 +238,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
         recipients.put(Constants.DOWNVOTE_BY, Arrays.asList(hubUserMap.get(Constants.USER_ROLE + ":" + downvotedByUuids.get(0)).getUsername()));
         nEvent.setTagValues(tagValues);
         nEvent.setRecipients(recipients);
+        logger.info("Event prepared");
         notifyHandler.sendNotification(nEvent);
     }
 }
