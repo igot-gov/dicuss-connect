@@ -42,7 +42,7 @@ public class OutboundRequestHandlerServiceImpl {
 		str.append("URI: ").append(uri.toString()).append(System.lineSeparator());
 		try {
 			str.append("Request: ").append(mapper.writeValueAsString(request)).append(System.lineSeparator());
-			logger.debug(str.toString());
+			logger.info(str.toString());
 			HttpHeaders headers = new HttpHeaders();
 			headers.set(Constants.ROOT_ORG_CONSTANT, configuration.getHubRootOrg());
 			HttpEntity entity = new HttpEntity<>(request, headers);
