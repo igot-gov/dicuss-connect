@@ -1,6 +1,6 @@
 package com.eagle.hubnotifier.consumer;
 
-import com.eagle.hubnotifier.service.NotifyHookService;
+import com.eagle.hubnotifier.service.interfaces.NotifyHookService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.logging.log4j.LogManager;

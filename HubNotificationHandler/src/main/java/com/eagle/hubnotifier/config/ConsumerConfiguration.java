@@ -33,7 +33,7 @@ import java.util.Map;
 public class ConsumerConfiguration {
 
 	@Autowired
-	private  com.eagle.hubnotifier.config.Configuration props;
+	private com.eagle.hubnotifier.config.Configuration props;
 
 	@Bean
 	KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {

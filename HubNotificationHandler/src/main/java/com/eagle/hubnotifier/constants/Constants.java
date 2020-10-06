@@ -1,7 +1,9 @@
-package com.eagle.hubnotifier.util;
+package com.eagle.hubnotifier.constants;
 
 public class Constants {
-    private Constants() { }
+    private Constants(){
+
+    }
     public static final String INCOMING_KAFKA_LISTENER = "incomingKafkaListenerContainerFactory";
 
     public static final String ROOT_ORG_CONSTANT = "rootOrg";
@@ -44,9 +46,9 @@ public class Constants {
 
     public static final String PARAM_CONTENT_CONSTANT = "params[content]";
 
-    public static final String PARAM_UID= "params[uid]";
+    public static final String PARAM_UID = "params[uid]";
 
-    public static final String PARAM_TID= "params[tid]";
+    public static final String PARAM_TID = "params[tid]";
 
     public static final String PARAM_OWNER = "params[owner]";
 
@@ -66,7 +68,5 @@ public class Constants {
 
     public static final String TOPIC_VALUE_CONSTANTS = "topic";
 
-
-
-
+    public static final String HOOK_VALUE = "hook";
 }

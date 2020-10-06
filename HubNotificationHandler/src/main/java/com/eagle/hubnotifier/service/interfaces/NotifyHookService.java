@@ -1,4 +1,4 @@
-package com.eagle.hubnotifier.service;
+package com.eagle.hubnotifier.service.interfaces;
 
 import java.util.Map;
 

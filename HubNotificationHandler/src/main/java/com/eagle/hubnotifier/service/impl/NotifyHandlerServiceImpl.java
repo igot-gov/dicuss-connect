@@ -1,4 +1,4 @@
-package com.eagle.hubnotifier.service;
+package com.eagle.hubnotifier.service.impl;
 
 import com.eagle.hubnotifier.config.Configuration;
 import com.eagle.hubnotifier.model.NotificationEvent;

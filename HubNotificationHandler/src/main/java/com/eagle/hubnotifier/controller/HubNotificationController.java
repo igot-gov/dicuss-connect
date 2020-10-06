@@ -1,4 +1,4 @@
-package com.eagle.hubnotifier.web;
+package com.eagle.hubnotifier.controller;
 
 import java.util.Map;
 
@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import com.eagle.hubnotifier.service.NotifyHookService;
+import com.eagle.hubnotifier.service.interfaces.NotifyHookService;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;

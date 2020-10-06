@@ -1,9 +1,9 @@
-package com.eagle.hubnotifier.service;
+package com.eagle.hubnotifier.service.impl;
 
 import java.util.Map;
 
 import com.eagle.hubnotifier.config.Configuration;
-import com.eagle.hubnotifier.util.Constants;
+import com.eagle.hubnotifier.constants.Constants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ public class OutboundRequestHandlerServiceImpl {
 	 * @return
 	 * @throws Exception
 	 */
-	public Object fetchResultUsingPost(StringBuilder uri, Object request) throws Exception {
+	public Object fetchResultUsingPost(StringBuilder uri, Object request) throws Exception{
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 		Object response = null;
@@ -42,10 +42,11 @@ public class OutboundRequestHandlerServiceImpl {
 		str.append("URI: ").append(uri.toString()).append(System.lineSeparator());
 		try {
 			str.append("Request: ").append(mapper.writeValueAsString(request)).append(System.lineSeparator());
-			logger.info(str.toString());
+			String message = str.toString();
+			logger.info(message);
 			HttpHeaders headers = new HttpHeaders();
 			headers.set(Constants.ROOT_ORG_CONSTANT, configuration.getHubRootOrg());
-			HttpEntity entity = new HttpEntity<>(request, headers);
+			HttpEntity<Object> entity = new HttpEntity<>(request, headers);
 			response = restTemplate.postForObject(uri.toString(), entity, Map.class);
 		} catch (HttpClientErrorException e) {
 			logger.error("External Service threw an Exception: ", e);
@@ -70,7 +71,8 @@ public class OutboundRequestHandlerServiceImpl {
 				.append(System.lineSeparator());
 		str.append("URI: ").append(uri.toString()).append(System.lineSeparator());
 		try {
-			logger.debug(str.toString());
+			String message = str.toString();
+			logger.debug(message);
 			response = restTemplate.getForObject(uri.toString(), Map.class);
 		} catch (HttpClientErrorException e) {
 			logger.error("External Service threw an Exception: ", e);
