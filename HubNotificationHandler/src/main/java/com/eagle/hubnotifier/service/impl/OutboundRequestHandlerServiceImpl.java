@@ -33,7 +33,7 @@ public class OutboundRequestHandlerServiceImpl {
 	 * @return
 	 * @throws Exception
 	 */
-	public Object fetchResultUsingPost(StringBuilder uri, Object request) throws Exception{
+	public Object fetchResultUsingPost(StringBuilder uri, Object request) {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 		Object response = null;
@@ -50,7 +50,6 @@ public class OutboundRequestHandlerServiceImpl {
 			response = restTemplate.postForObject(uri.toString(), entity, Map.class);
 		} catch (HttpClientErrorException e) {
 			logger.error("External Service threw an Exception: ", e);
-			throw new Exception(e);
 		} catch (Exception e) {
 			logger.error("Exception while posting the data in notification service: ", e);
 		}
@@ -63,7 +62,7 @@ public class OutboundRequestHandlerServiceImpl {
 	 * @return
 	 * @throws Exception
 	 */
-	public Object fetchResult(StringBuilder uri) throws Exception {
+	public Object fetchResult(StringBuilder uri){
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 		Object response = null;
@@ -76,7 +75,6 @@ public class OutboundRequestHandlerServiceImpl {
 			response = restTemplate.getForObject(uri.toString(), Map.class);
 		} catch (HttpClientErrorException e) {
 			logger.error("External Service threw an Exception: ", e);
-			throw new Exception(e);
 		} catch (Exception e) {
 			logger.error("Exception while fetching from searcher: ", e);
 		}

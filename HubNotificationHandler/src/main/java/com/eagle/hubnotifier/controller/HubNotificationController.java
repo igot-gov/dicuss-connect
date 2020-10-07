@@ -24,7 +24,7 @@ public class HubNotificationController {
 	@Autowired
 	private NotifyHookService notifyService;
 
-	@SuppressWarnings("unchecked")
+	
 	@PostMapping(value = "/handleNotification", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = {
 			MediaType.APPLICATION_ATOM_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<HttpStatus> handleHubNotification(@RequestParam MultiValueMap<String, String> paramMap){

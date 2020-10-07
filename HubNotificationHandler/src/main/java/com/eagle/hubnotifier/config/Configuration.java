@@ -30,18 +30,6 @@ public class Configuration {
     @Value("${hub.service.get.path}")
     private String hubServiceGetPath;
 
-    @Value("${kafka.max.poll.interval.ms}")
-    private Integer kafkaMaxPollInterval;
-
-    @Value("${kakfa.offset.reset.value}")
-    private String kafkaOffsetResetValue;
-
-    @Value("${spring.kafka.bootstrap.servers}")
-    private String kafkabootstrapAddress;
-
-    @Value("${kafka.max.poll.records}")
-    private Integer kafkaMaxPollRecords;
-
     public String getNotifyServiceHost() {
         return notifyServiceHost;
     }
@@ -65,13 +53,5 @@ public class Configuration {
     public String getHubServiceGetPath() {return hubServiceGetPath;}
 
     public String getTopicSearchPath() {return topicSearchPath;}
-
-    public Integer getKafkaMaxPollInterval() {return kafkaMaxPollInterval;}
-
-    public Integer getKafkaMaxPollRecords() {return kafkaMaxPollRecords;}
-
-    public String getKafkaOffsetResetValue() {return kafkaOffsetResetValue;}
-
-    public String getKafkabootstrapAddress() {return kafkabootstrapAddress;}
 
 }

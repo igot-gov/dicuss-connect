@@ -20,7 +20,7 @@ public class NotificationEvent implements Serializable{
 	private String rootOrg;
 
 	@JsonProperty(value = "target-data")
-	private Map<String, Object> targetData;
+	private transient Map<String, Object> targetData;
 
 	@NotBlank
 	@JsonProperty(value = "event-id")
@@ -29,7 +29,7 @@ public class NotificationEvent implements Serializable{
 //	@NotNull
 //	@NotEmpty
 	@JsonProperty(value = "tag-value-pair")
-	private Map<String, Object> tagValues;
+	private transient Map<String, Object> tagValues;
 
 	@NotNull
 	@NotEmpty

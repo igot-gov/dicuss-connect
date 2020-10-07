@@ -1,6 +1,8 @@
 package com.eagle.hubnotifier.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Getter;
+import lombok.Setter;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -8,61 +10,21 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "objects")
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Getter
+@Setter
 public class HubUser {
-	@Id
-	private ObjectId id;
+    @Id
+    private ObjectId id;
 
-	@Field("_key")
-	private String key;
+    @Field("_key")
+    private String key;
 
-	@Field("email")
-	private String email;
+    @Field("email")
+    private String email;
 
-	@Field("username")
-	private String username;
+    @Field("username")
+    private String username;
 
-	@Field("uid")
-	private Long uid;
-
-	public ObjectId getId() {
-		return id;
-	}
-
-	public void setId(ObjectId id) {
-		this.id = id;
-	}
-
-	public String getKey() {
-		return key;
-	}
-
-	public void setKey(String key) {
-		this.key = key;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public Long getUid() {
-		return uid;
-	}
-
-	public void setUid(Long uid) {
-		this.uid = uid;
-	}
-	
-	
+    @Field("uid")
+    private Long uid;
 }
