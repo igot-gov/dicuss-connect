@@ -183,7 +183,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
      *
      * @param data
      */
-    private void handleTopicUpvoteEvent(Map<String, Object> data) {
+    public void handleTopicUpvoteEvent(Map<String, Object> data) {
         NotificationEvent nEvent = new NotificationEvent();
         nEvent.setEventId(Constants.DISCUSSION_UPVOTE_EVENT);
         Map<String, Object> tagValues = new HashMap<>();
@@ -207,7 +207,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
      *
      * @param data
      */
-    private void handleTopicDownVoteEvent(Map<String, Object> data) {
+    public void handleTopicDownVoteEvent(Map<String, Object> data) {
         NotificationEvent nEvent = new NotificationEvent();
         nEvent.setEventId(Constants.DISCUSSION_DOWNVOTE_EVENT);
         Map<String, Object> tagValues = new HashMap<>();
