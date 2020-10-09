@@ -95,7 +95,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
      * @param data
      */
     @SuppressWarnings("unchecked")
-    private void handleTopicCreate(Map<String, Object> data) {
+    public void handleTopicCreate(Map<String, Object> data) {
         logger.info("Received Topic Creation Event");
         NotificationEvent nEvent = new NotificationEvent();
         nEvent.setEventId(Constants.DISCUSSION_CREATION_EVENT_ID);
@@ -157,7 +157,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
      *
      * @param data
      */
-    private void handleTopicReplyEvent(Map<String, Object> data) {
+    public void handleTopicReplyEvent(Map<String, Object> data) {
         NotificationEvent nEvent = new NotificationEvent();
         nEvent.setEventId(Constants.DISCUSSION_REPLY_EVENT_ID);
         Map<String, Object> tagValues = new HashMap<>();
