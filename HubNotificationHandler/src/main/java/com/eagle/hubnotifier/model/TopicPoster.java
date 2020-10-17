@@ -8,20 +8,18 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.List;
-
 @Document(collection = "objects")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Getter
 @Setter
-public class HubFollowers {
+public class TopicPoster {
     @Id
     private ObjectId id;
 
     @Field("_key")
     private String key;
 
-    @Field("members")
-    private List<String> members;
+    @Field("value")
+    private String value;
 
 }

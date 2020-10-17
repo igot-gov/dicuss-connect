@@ -44,10 +44,10 @@ public class NotifyHookServiceImpl implements NotifyHookService {
     private HubTopicRepository hubTopicRepository;
 
     @Autowired
-    private HubPostersRepositoy hubPostersRepositoy;
+    private TopicPostersRepositoy topicPostersRepositoy;
 
     @Autowired
-    private HubFollowersRepository hubFollowersRepository;
+    private TopicFollowerRepository topicFollowerRepository;
 
     @Override
     public void handleNotifiyRestRequest(Map<String, Object> data) {
@@ -69,25 +69,32 @@ public class NotifyHookServiceImpl implements NotifyHookService {
         }
         List<String> hookList = (List<String>) data.get(Constants.HOOK_VALUE);
         if (hookList != null) {
+            NotificationEvent notificationEvent = null;
             for (String hook : hookList) {
+                notificationEvent = new NotificationEvent();
+                boolean notificationEnabledForEvent = true;
                 switch (hook) {
                     case Constants.FILTER_TOPIC_CREATE:
-                        handleTopicCreate(data);
+                        handleTopicCreate(data, notificationEvent);
                         break;
                     case Constants.FILTER_POST_CREATE:
-                        handlePostCreate(data);
+                        handlePostCreate(data, notificationEvent);
                         break;
                     case Constants.FILTER_TOPIC_REPLY:
-                        handleTopicReplyEvent(data);
+                        handleTopicReplyEvent(data, notificationEvent);
                         break;
                     case Constants.ACTION_POST_UPVOTE:
-                        handleTopicUpvoteEvent(data);
+                        handleTopicUpvoteEvent(data, notificationEvent);
                         break;
                     case Constants.ACTION_POST_DOWNVOTE:
-                        handleTopicDownVoteEvent(data);
+                        handleTopicDownVoteEvent(data, notificationEvent);
                         break;
                     default:
+                        notificationEnabledForEvent = false;
                         break;
+                }
+                if (notificationEnabledForEvent) {
+                    notifyHandler.sendNotification(notificationEvent);
                 }
             }
         }
@@ -99,9 +106,8 @@ public class NotifyHookServiceImpl implements NotifyHookService {
      * @param data
      */
     @SuppressWarnings("unchecked")
-    private void handleTopicCreate(Map<String, Object> data) {
+    private void handleTopicCreate(Map<String, Object> data, NotificationEvent nEvent) {
         logger.info("Received Topic Creation Event");
-        NotificationEvent nEvent = new NotificationEvent();
         nEvent.setEventId(Constants.DISCUSSION_CREATION_EVENT_ID);
         Map<String, Object> tagValues = new HashMap<>();
         tagValues.put(Constants.DISCUSSION_CREATION_TOPIC_TAG, ((List<String>) data.get(Constants.PARAM_TOPIC_TITLE_CONSTANT)).get(0));
@@ -112,7 +118,6 @@ public class NotifyHookServiceImpl implements NotifyHookService {
         recipients.put(Constants.AUTHOR_ROLE, Arrays.asList(user.getUsername()));
         nEvent.setTagValues(tagValues);
         nEvent.setRecipients(recipients);
-        notifyHandler.sendNotification(nEvent);
     }
 
     /**
@@ -120,7 +125,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
      *
      * @param data
      */
-    private void handlePostCreate(Map<String, Object> data) {
+    private void handlePostCreate(Map<String, Object> data, NotificationEvent nEvent) {
         ObjectMapper mapper = new ObjectMapper();
         try {
             String message = mapper.writeValueAsString(data);
@@ -128,8 +133,6 @@ public class NotifyHookServiceImpl implements NotifyHookService {
         } catch (JsonProcessingException e) {
             logger.error("Data parse exception occured : ", e);
         }
-
-        NotificationEvent nEvent = new NotificationEvent();
         nEvent.setEventId("discussion_comment_creation");
 
         Map<String, List<String>> recipients = new HashMap<>();
@@ -161,8 +164,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
      *
      * @param data
      */
-    private void handleTopicReplyEvent(Map<String, Object> data) {
-        NotificationEvent nEvent = new NotificationEvent();
+    private void handleTopicReplyEvent(Map<String, Object> data, NotificationEvent nEvent) {
         nEvent.setEventId(Constants.DISCUSSION_REPLY_EVENT_ID);
         Map<String, Object> tagValues = new HashMap<>();
         tagValues.put(Constants.COMMENT_TAG, ((List<String>) data.get(Constants.PARAM_CONTENT_CONSTANT)).get(0));
@@ -175,23 +177,12 @@ public class NotifyHookServiceImpl implements NotifyHookService {
             tagValues.put(Constants.DISCUSSION_CREATION_TOPIC_TAG, topicData.getTitle());
             HubUser author = userRepository.findByKey(Constants.USER_ROLE + ":" + topicData.getUid());
             List<String> watchersList = getWatchersList(String.valueOf(topicData.getTid()));
-            if (!watchersList.isEmpty()) {
-                if (!watchersList.contains(author.getUsername())) {
-                    watchersList.add(author.getUsername());
-                }
-                if (watchersList.contains(repliedByUser.getUsername())) {
-                    watchersList.remove(repliedByUser.getUsername());
-                }
-            } else {
-                watchersList = new ArrayList<>();
-                watchersList.add(author.getUsername());
-            }
+            watchersList = getFinalListOfWatchers(watchersList, author.getUsername(), repliedByUser.getUsername());
             recipients.put(Constants.AUTHOR_ROLE, watchersList);
         }
         recipients.put(Constants.COMMENTED_BY_TAG, Arrays.asList(repliedByUser.getUsername()));
         nEvent.setTagValues(tagValues);
         nEvent.setRecipients(recipients);
-        notifyHandler.sendNotification(nEvent);
     }
 
     /**
@@ -199,8 +190,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
      *
      * @param data
      */
-    private void handleTopicUpvoteEvent(Map<String, Object> data) {
-        NotificationEvent nEvent = new NotificationEvent();
+    private void handleTopicUpvoteEvent(Map<String, Object> data, NotificationEvent nEvent) {
         nEvent.setEventId(Constants.DISCUSSION_UPVOTE_EVENT);
         Map<String, Object> tagValues = new HashMap<>();
         HubPost hubPost = hubPostRepository.findByKey(Constants.POST_ROLE + ":" + ((List<String>) data.get(Constants.PARAMS_PID)).get(0));
@@ -212,22 +202,11 @@ public class NotifyHookServiceImpl implements NotifyHookService {
         tagValues.put(Constants.DISCUSSION_CREATION_TARGET_URL, configuration.getDiscussionCreateUrl() + hubPost.getTid());
         Map<String, List<String>> recipients = new HashMap<>();
         List<String> watchersList = getWatchersList(String.valueOf(hubPost.getTid()));
-        if (!watchersList.isEmpty()) {
-            if (!watchersList.contains(hubUserMap.get(Constants.USER_ROLE + ":" + hubPost.getUid()).getUsername())) {
-                watchersList.add(hubUserMap.get(Constants.USER_ROLE + ":" + hubPost.getUid()).getUsername());
-            }
-            if (watchersList.contains(hubUserMap.get(Constants.USER_ROLE + ":" + upvotedByUuids.get(0)).getUsername())) {
-                watchersList.remove(hubUserMap.get(Constants.USER_ROLE + ":" + upvotedByUuids.get(0)).getUsername());
-            }
-        } else {
-            watchersList = new ArrayList<>();
-            watchersList.add(hubUserMap.get(Constants.USER_ROLE + ":" + hubPost.getUid()).getUsername());
-        }
+        watchersList = getFinalListOfWatchers(watchersList, hubUserMap.get(Constants.USER_ROLE + ":" + hubPost.getUid()).getUsername(), hubUserMap.get(Constants.USER_ROLE + ":" + upvotedByUuids.get(0)).getUsername());
         recipients.put(Constants.AUTHOR_ROLE, watchersList);
         recipients.put(Constants.UPVOTED_BY, Arrays.asList(hubUserMap.get(Constants.USER_ROLE + ":" + upvotedByUuids.get(0)).getUsername()));
         nEvent.setTagValues(tagValues);
         nEvent.setRecipients(recipients);
-        notifyHandler.sendNotification(nEvent);
     }
 
     /**
@@ -235,8 +214,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
      *
      * @param data
      */
-    private void handleTopicDownVoteEvent(Map<String, Object> data) {
-        NotificationEvent nEvent = new NotificationEvent();
+    private void handleTopicDownVoteEvent(Map<String, Object> data, NotificationEvent nEvent) {
         nEvent.setEventId(Constants.DISCUSSION_DOWNVOTE_EVENT);
         Map<String, Object> tagValues = new HashMap<>();
         HubPost hubPost = hubPostRepository.findByKey(Constants.POST_ROLE + ":" + ((List<String>) data.get(Constants.PARAMS_PID)).get(0));
@@ -247,33 +225,23 @@ public class NotifyHookServiceImpl implements NotifyHookService {
         tagValues.put(Constants.DISCUSSION_CREATION_TARGET_URL, configuration.getDiscussionCreateUrl() + hubPost.getTid());
         Map<String, List<String>> recipients = new HashMap<>();
         List<String> watchersList = getWatchersList(String.valueOf(hubPost.getTid()));
-        if (!watchersList.isEmpty()) {
-            if (!watchersList.contains(hubUserMap.get(Constants.USER_ROLE + ":" + hubPost.getUid()).getUsername())) {
-                watchersList.add(hubUserMap.get(Constants.USER_ROLE + ":" + hubPost.getUid()).getUsername());
-            }
-            if (watchersList.contains(hubUserMap.get(Constants.USER_ROLE + ":" + ((List<String>) data.get(Constants.PARAM_UID)).get(0)).getUsername())) {
-                watchersList.remove(hubUserMap.get(Constants.USER_ROLE + ":" + ((List<String>) data.get(Constants.PARAM_UID)).get(0)).getUsername());
-            }
-        } else {
-            watchersList = new ArrayList<>();
-            watchersList.add(hubUserMap.get(Constants.USER_ROLE + ":" + hubPost.getUid()).getUsername());
-        }
+        watchersList = getFinalListOfWatchers(watchersList, hubUserMap.get(Constants.USER_ROLE + ":" + hubPost.getUid()).getUsername(), hubUserMap.get(Constants.USER_ROLE + ":" + ((List<String>) data.get(Constants.PARAM_UID)).get(0)).getUsername());
         recipients.put(Constants.AUTHOR_ROLE, Arrays.asList(hubUserMap.get(Constants.USER_ROLE + ":" + hubPost.getUid()).getUsername()));
         recipients.put(Constants.DOWNVOTE_BY, Arrays.asList(hubUserMap.get(Constants.USER_ROLE + ":" + ((List<String>) data.get(Constants.PARAM_UID)).get(0)).getUsername()));
         nEvent.setTagValues(tagValues);
         nEvent.setRecipients(recipients);
-        notifyHandler.sendNotification(nEvent);
     }
 
     /**
      * Get the watcher list including followers, watchers and posters
+     *
      * @param tid
      * @return List of username of users
      */
     public List<String> getWatchersList(String tid) {
-        List<HubPosters> hubPosters = hubPostersRepositoy.findByKey(Constants.TID_CONSTANTS + ":" + tid + ":" + Constants.POSTERS_CONSTANT);
+        List<TopicPoster> hubPosters = topicPostersRepositoy.findByKey(Constants.TID_CONSTANTS + ":" + tid + ":" + Constants.POSTERS_CONSTANT);
         List<String> postersUUId = hubPosters.stream().map(poster -> poster.getValue()).collect(Collectors.toList());
-        HubFollowers followers = hubFollowersRepository.findByKey(Constants.TID_CONSTANTS + ":" + tid + ":" + Constants.FOLLOWERS_CONSTANT);
+        TopicFollower followers = topicFollowerRepository.findByKey(Constants.TID_CONSTANTS + ":" + tid + ":" + Constants.FOLLOWERS_CONSTANT);
         List<String> followersUUId = new ArrayList<>();
         if (!ObjectUtils.isEmpty(followers)) {
             followersUUId = followers.getMembers();
@@ -297,5 +265,26 @@ public class NotifyHookServiceImpl implements NotifyHookService {
             watchersUserName = userList.stream().map(user -> user.getUsername()).collect(Collectors.toList());
         }
         return watchersUserName;
+    }
+
+    /**
+     * @param watchersList
+     * @param addUser
+     * @param removeUser
+     * @return Get final list of watchers
+     */
+    private List<String> getFinalListOfWatchers(List<String> watchersList, String addUser, String removeUser) {
+        if (!watchersList.isEmpty()) {
+            if (!watchersList.contains(addUser)) {
+                watchersList.add(addUser);
+            }
+            if (watchersList.contains(removeUser)) {
+                watchersList.remove(removeUser);
+            }
+        } else {
+            watchersList = new ArrayList<>();
+            watchersList.add(addUser);
+        }
+        return watchersList;
     }
 }
