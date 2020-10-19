@@ -1,9 +1,10 @@
 package com.eagle.hubnotifier.constants;
 
 public class Constants {
-    private Constants(){
+    private Constants() {
 
     }
+
     public static final String INCOMING_KAFKA_LISTENER = "incomingKafkaListenerContainerFactory";
 
     public static final String ROOT_ORG_CONSTANT = "rootOrg";
@@ -69,4 +70,10 @@ public class Constants {
     public static final String TOPIC_VALUE_CONSTANTS = "topic";
 
     public static final String HOOK_VALUE = "hook";
+
+    public static final String FOLLOWERS_CONSTANT = "followers";
+
+    public static final String POSTERS_CONSTANT = "posters";
+
+    public static final String TID_CONSTANTS = "tid";
 }
