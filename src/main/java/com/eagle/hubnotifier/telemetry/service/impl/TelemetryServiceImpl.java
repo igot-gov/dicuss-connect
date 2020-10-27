@@ -1,0 +1,187 @@
+package com.eagle.hubnotifier.telemetry.service.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.eagle.hubnotifier.cache.CategoryCacheManager;
+import com.eagle.hubnotifier.config.Configuration;
+import com.eagle.hubnotifier.constants.Constants;
+import com.eagle.hubnotifier.model.HubUser;
+import com.eagle.hubnotifier.repository.HubUserRepository;
+import com.eagle.hubnotifier.service.impl.OutboundRequestHandlerServiceImpl;
+import com.eagle.hubnotifier.telemetry.model.Actor;
+import com.eagle.hubnotifier.telemetry.model.Context;
+import com.eagle.hubnotifier.telemetry.model.EData;
+import com.eagle.hubnotifier.telemetry.model.Event;
+import com.eagle.hubnotifier.telemetry.model.TelemetryData;
+import com.eagle.hubnotifier.telemetry.service.TelemetryService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+@Service
+public class TelemetryServiceImpl implements TelemetryService {
+	Logger logger = LogManager.getLogger(TelemetryServiceImpl.class);
+
+	@Autowired
+	private Configuration config;
+
+	@Autowired
+	private OutboundRequestHandlerServiceImpl serviceRepo;
+
+	@Autowired
+	private HubUserRepository userRepository;
+
+	@Autowired
+	private CategoryCacheManager categoryCacheManager;
+
+	@Override
+	public void handleNotifyKafkaTopicRequest(Map<String, Object> data) {
+		logger.info("Recived request from Topic Consumer");
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			String message = mapper.writeValueAsString(data);
+			logger.info("Received Data : {}", message);
+		} catch (JsonProcessingException ex) {
+			logger.error("Not able to parse the data", ex);
+		}
+		List<String> hookList = (List<String>) data.get(Constants.HOOK_VALUE);
+		if (hookList != null) {
+			for (String hook : hookList) {
+				TelemetryData tData = createTelemetryData();
+
+				boolean notificationEnabledForEvent = true;
+				switch (hook) {
+				case Constants.FILTER_TOPIC_CREATE:
+					handleTopicCreate(data, tData);
+					break;
+				case Constants.FILTER_POST_CREATE:
+					handlePostCreate(data, tData);
+					break;
+				case Constants.FILTER_TOPIC_REPLY:
+					handleTopicReplyEvent(data, tData);
+					break;
+				case Constants.ACTION_POST_UPVOTE:
+					handleTopicUpvoteEvent(data, tData);
+					break;
+				case Constants.ACTION_POST_DOWNVOTE:
+					handleTopicDownVoteEvent(data, tData);
+					break;
+				default:
+					notificationEnabledForEvent = false;
+					break;
+				}
+				if (notificationEnabledForEvent) {
+					sendNotification(tData);
+				}
+			}
+		}
+	}
+
+	private void handleTopicCreate(Map<String, Object> data, TelemetryData tData) {
+
+		EData eData = EData.builder().id(config.getTelemetryEDataId()).type(config.getTelemetryEDataCreateType())
+				.target(config.getTelemetryEDataTopicTarget())
+				.pageid(config.getDiscussionCreateUrl() + getTopicId(data, Constants.PARAM_TOPIC_TID_CONSTANT))
+				.topicName(getTopicTitle(data, Constants.PARAM_TOPIC_TITLE_CONSTANT))
+				.categoryName(getCategoryName(data)).build();
+		tData.getEvent().setEData(eData);
+
+		tData.getEvent().setActor(Actor.builder().id(getUserName(data, Constants.PARAM_TOPIC_UID_CONSTANT))
+				.type(Constants.USER_ROLE).build());
+		tData.getEvent().setEid(config.getTelemetryEventEidInteract());
+
+		logger.info("Created TelemetryData: {}", tData);
+	}
+
+	private void handlePostCreate(Map<String, Object> data, TelemetryData tData) {
+		EData eData = EData.builder().id(config.getTelemetryEDataId()).type(config.getTelemetryEDataCreateType())
+				.target(config.getTelemetryEDataPostTarget())
+				.pageid(config.getDiscussionCreateUrl() + getTopicId(data, Constants.PARAM_POST_TID_CONSTANT))
+				.topicName(getTopicTitle(data, Constants.PARAM_POST_TOPIC_TITLE)).categoryName(getCategoryName(data))
+				.build();
+		tData.getEvent().setEData(eData);
+		tData.getEvent().setActor(Actor.builder().id(getUserName(data, Constants.PARAM_POST_UID_CONSTANT))
+				.type(Constants.USER_ROLE).build());
+		tData.getEvent().setEid(config.getTelemetryEventEidImpression());
+	}
+
+	private void handleTopicReplyEvent(Map<String, Object> data, TelemetryData tData) {
+
+	}
+
+	private void handleTopicUpvoteEvent(Map<String, Object> data, TelemetryData tData) {
+
+	}
+
+	private void handleTopicDownVoteEvent(Map<String, Object> data, TelemetryData tData) {
+
+	}
+
+	private TelemetryData createTelemetryData() {
+		TelemetryData tData = new TelemetryData();
+		tData.setId(config.getTelemetryId());
+		tData.setVer(config.getTelemetryVersion());
+		tData.setEts(System.currentTimeMillis());
+		List<Event> events = new ArrayList<Event>();
+		Event event = new Event();
+		event.setVer(config.getTelemetryEventVerion());
+		event.setEts(System.currentTimeMillis());
+
+		Context context = new Context();
+		context.setChannel(config.getTelemetryContextChannel());
+		context.setEnv(config.getTelemetryContextEnv());
+
+		// TODO - Create a random string to cover the session id
+		context.setSid("");
+
+		// TODO - create a uuid for the did value
+		context.setDid("");
+		event.setContext(context);
+
+		events.add(event);
+		tData.setEvents(events);
+
+		return tData;
+	}
+
+	private String getCategoryName(Map<String, Object> data) {
+		return categoryCacheManager
+				.getCategoryName(Integer.parseInt(((List<String>) data.get(Constants.PARAM_POST_CID_CONSTANT)).get(0)));
+	}
+
+	private String getTopicId(Map<String, Object> data, String key) {
+		return ((List<String>) data.get(key)).get(0);
+	}
+
+	private String getTopicTitle(Map<String, Object> data, String key) {
+		return ((List<String>) data.get(key)).get(0);
+	}
+
+	private String getUserName(Map<String, Object> data, String key) {
+		List<String> topicUids = (List<String>) data.get(key);
+		HubUser user = userRepository.findByKey(Constants.USER_ROLE + ":" + topicUids.get(0));
+		return user.getUsername();
+	}
+
+	/**
+	 * Post to the Notification service
+	 *
+	 * @param tData
+	 * @throws Exception
+	 */
+	public void sendNotification(TelemetryData tData) {
+		StringBuilder builder = new StringBuilder();
+		builder.append(config.getTelemetryServiceHost()).append(config.getTelemetryServicePath());
+		try {
+			serviceRepo.fetchResultUsingPost(builder, tData, TelemetryData.class);
+		} catch (Exception e) {
+			logger.error("Exception while posting the data in notification service: ", e);
+		}
+	}
+}
