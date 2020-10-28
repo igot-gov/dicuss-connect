@@ -27,7 +27,7 @@ public class Constants {
 
     public static final String DISCUSSION_REPLY_EVENT_ID = "discussion_comment_creation";
 
-    public static final String COMMENTED_BY_NAME_TAG = "#commentedByName";
+    public static final String COMMENTED_BY_NAME_TAG = "#commentedBy";
 
     public static final String REPLY_TAG = "#replyText";
 
