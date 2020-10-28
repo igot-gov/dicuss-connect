@@ -30,6 +30,8 @@ public class Constants {
     public static final String COMMENTED_BY_NAME_TAG = "#commentedBy";
 
     public static final String REPLY_TAG = "#replyText";
+    
+    public static final String COMMENT_TAG = "#comment";
 
     public static final String COMMENTED_BY_TAG = "commentedBy";
 

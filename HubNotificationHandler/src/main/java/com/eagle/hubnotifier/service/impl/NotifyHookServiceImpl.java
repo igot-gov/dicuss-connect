@@ -174,7 +174,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
 		Map<String, Object> tagValues = new HashMap<>();
 		HubPost hubPost = hubPostRepository
 				.findByKey(Constants.POST_ROLE + ":" + ((List<String>) data.get(Constants.PARAMS_PID)).get(0));
-		tagValues.put(Constants.REPLY_TAG, hubPost.getContent());
+		tagValues.put(Constants.COMMENT_TAG, hubPost.getContent());
 		List<String> upvotedByUuids = (List<String>) data.get(Constants.PARAM_UID);
 		List<HubUser> userList = userRepository.findByUUIDS(Arrays.asList(
 				Constants.USER_ROLE + ":" + upvotedByUuids.get(0), Constants.USER_ROLE + ":" + hubPost.getUid()));
@@ -206,7 +206,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
 		Map<String, Object> tagValues = new HashMap<>();
 		HubPost hubPost = hubPostRepository
 				.findByKey(Constants.POST_ROLE + ":" + ((List<String>) data.get(Constants.PARAMS_PID)).get(0));
-		tagValues.put(Constants.REPLY_TAG, hubPost.getContent());
+		tagValues.put(Constants.COMMENT_TAG, hubPost.getContent());
 		List<HubUser> userList = userRepository.findByUUIDS(
 				Arrays.asList(Constants.USER_ROLE + ":" + ((List<String>) data.get(Constants.PARAM_UID)).get(0),
 						Constants.USER_ROLE + ":" + hubPost.getUid()));
