@@ -29,7 +29,7 @@ public class Constants {
 
     public static final String COMMENTED_BY_NAME_TAG = "#commentedByName";
 
-    public static final String COMMENT_TAG = "#comment";
+    public static final String REPLY_TAG = "#replyText";
 
     public static final String COMMENTED_BY_TAG = "commentedBy";
 
@@ -92,4 +92,6 @@ public class Constants {
     public static final String TID_CONSTANTS = "tid";
     
     public static final String LISTENERS = "listeners";
+    
+    public static final String EXTRA_DOTS = "...";
 }

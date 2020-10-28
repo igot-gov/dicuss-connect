@@ -118,13 +118,22 @@ public class NotifyHookServiceImpl implements NotifyHookService {
 			return;
 		}
 
-		tagValues.put(Constants.COMMENT_TAG, ((List<String>) data.get(Constants.PARAM_POST_CONTENT_CONSTANT)).get(0));
+		String replyText = ((List<String>) data.get(Constants.PARAM_POST_CONTENT_CONSTANT)).get(0);
+		if(replyText.length() > configuration.getTopicReplyMaxLength()) {
+			replyText = replyText.substring(0, configuration.getTopicReplyMaxLength()).trim() + Constants.EXTRA_DOTS;
+		}
+		tagValues.put(Constants.REPLY_TAG, replyText);
 		tagValues.put(Constants.COMMENTED_BY_NAME_TAG, currentPostCreator.getUsername());
 		tagValues.put(Constants.DISCUSSION_CREATION_TARGET_URL, configuration.getDiscussionCreateUrl() + topicId);
 
 		HubTopic topic = getTopicDetails(topicId);
 		List<String> authorList = new ArrayList<String>(2);
 		if (topic != null) {
+			String topicTitle = topic.getTitle();
+			if(topicTitle.length() > configuration.getTopicTitleMaxLength()) {
+				topicTitle = topicTitle.substring(0, configuration.getTopicTitleMaxLength()).trim() + Constants.EXTRA_DOTS;
+			}
+			tagValues.put(Constants.DISCUSSION_CREATION_TOPIC_TAG, topicTitle);
 			if (!currentPostCreatorUid.equalsIgnoreCase(topic.getUid().toString())) {
 				// Topic Creator and Post Creator are different. We need to send notification to
 				// topic creator
@@ -164,7 +173,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
 		Map<String, Object> tagValues = new HashMap<>();
 		HubPost hubPost = hubPostRepository
 				.findByKey(Constants.POST_ROLE + ":" + ((List<String>) data.get(Constants.PARAMS_PID)).get(0));
-		tagValues.put(Constants.COMMENT_TAG, hubPost.getContent());
+		tagValues.put(Constants.REPLY_TAG, hubPost.getContent());
 		List<String> upvotedByUuids = (List<String>) data.get(Constants.PARAM_UID);
 		List<HubUser> userList = userRepository.findByUUIDS(Arrays.asList(
 				Constants.USER_ROLE + ":" + upvotedByUuids.get(0), Constants.USER_ROLE + ":" + hubPost.getUid()));
@@ -196,7 +205,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
 		Map<String, Object> tagValues = new HashMap<>();
 		HubPost hubPost = hubPostRepository
 				.findByKey(Constants.POST_ROLE + ":" + ((List<String>) data.get(Constants.PARAMS_PID)).get(0));
-		tagValues.put(Constants.COMMENT_TAG, hubPost.getContent());
+		tagValues.put(Constants.REPLY_TAG, hubPost.getContent());
 		List<HubUser> userList = userRepository.findByUUIDS(
 				Arrays.asList(Constants.USER_ROLE + ":" + ((List<String>) data.get(Constants.PARAM_UID)).get(0),
 						Constants.USER_ROLE + ":" + hubPost.getUid()));
