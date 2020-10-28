@@ -25,12 +25,7 @@ public class NotifyHandlerServiceImpl {
 	 */
 	public void sendNotification(NotificationEvent nEvent) {
 		StringBuilder builder = new StringBuilder();
-		builder.append("URL: ").append(config.getNotifyServiceHost()).append(config.getNotifyServicePath());
-		builder.append(System.lineSeparator());
-		builder.append("Event: ").append(nEvent);
-//		if (logger.isDebugEnabled()) {
-			logger.info("Sending Notification: {}", builder.toString());
-//		}
+		builder.append(config.getNotifyServiceHost()).append(config.getNotifyServicePath());
 		try {
 			 serviceRepo.fetchResultUsingPost(builder, nEvent);
 		} catch (Exception e) {
