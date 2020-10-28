@@ -119,19 +119,21 @@ public class NotifyHookServiceImpl implements NotifyHookService {
 		}
 
 		String replyText = ((List<String>) data.get(Constants.PARAM_POST_CONTENT_CONSTANT)).get(0);
-		if(replyText.length() > configuration.getTopicReplyMaxLength()) {
+		if (replyText.length() > configuration.getTopicReplyMaxLength()) {
 			replyText = replyText.substring(0, configuration.getTopicReplyMaxLength()).trim() + Constants.EXTRA_DOTS;
 		}
 		tagValues.put(Constants.REPLY_TAG, replyText);
 		tagValues.put(Constants.COMMENTED_BY_NAME_TAG, currentPostCreator.getUsername());
+		recipients.put(Constants.COMMENTER_ROLE, Arrays.asList(currentPostCreator.getUsername()));
 		tagValues.put(Constants.DISCUSSION_CREATION_TARGET_URL, configuration.getDiscussionCreateUrl() + topicId);
 
 		HubTopic topic = getTopicDetails(topicId);
 		List<String> authorList = new ArrayList<String>(2);
 		if (topic != null) {
 			String topicTitle = topic.getTitle();
-			if(topicTitle.length() > configuration.getTopicTitleMaxLength()) {
-				topicTitle = topicTitle.substring(0, configuration.getTopicTitleMaxLength()).trim() + Constants.EXTRA_DOTS;
+			if (topicTitle.length() > configuration.getTopicTitleMaxLength()) {
+				topicTitle = topicTitle.substring(0, configuration.getTopicTitleMaxLength()).trim()
+						+ Constants.EXTRA_DOTS;
 			}
 			tagValues.put(Constants.DISCUSSION_CREATION_TOPIC_TAG, topicTitle);
 			if (!currentPostCreatorUid.equalsIgnoreCase(topic.getUid().toString())) {
@@ -139,7 +141,6 @@ public class NotifyHookServiceImpl implements NotifyHookService {
 				// topic creator
 				topicCreator = getUserDetails(topic.getUid().toString());
 				if (topicCreator != null) {
-					recipients.put(Constants.AUTHOR_ROLE, Arrays.asList(topicCreator.getUsername()));
 					authorList.add(topicCreator.getUsername());
 				}
 			}

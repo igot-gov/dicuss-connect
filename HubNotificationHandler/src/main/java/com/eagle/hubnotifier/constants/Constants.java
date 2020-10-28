@@ -34,6 +34,8 @@ public class Constants {
     public static final String COMMENTED_BY_TAG = "commentedBy";
 
     public static final String AUTHOR_ROLE = "author";
+    
+    public static final String COMMENTER_ROLE = "commenter";
 
     public static final String USER_ROLE = "user";
     
