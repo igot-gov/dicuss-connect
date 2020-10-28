@@ -27,25 +27,41 @@ public class Constants {
 
     public static final String DISCUSSION_REPLY_EVENT_ID = "discussion_comment_creation";
 
-    public static final String COMMENTED_BY_NAME_TAG = "#commentedByName";
+    public static final String COMMENTED_BY_NAME_TAG = "#commentedBy";
 
-    public static final String COMMENT_TAG = "#comment";
+    public static final String REPLY_TAG = "#replyText";
 
     public static final String COMMENTED_BY_TAG = "commentedBy";
 
     public static final String AUTHOR_ROLE = "author";
+    
+    public static final String COMMENTER_ROLE = "commenter";
 
     public static final String USER_ROLE = "user";
+    
+    public static final String USER_KEY = "user:";
+    
+    public static final String TOPIC_KEY = "topic:";
 
     public static final String POST_ROLE = "post";
+    
+    public static final String POST_KEY = "post:";
 
     public static final String PARAM_TOPIC_TITLE_CONSTANT = "params[topic][title]";
 
     public static final String PARAM_TOPIC_TID_CONSTANT = "params[topic][tid]";
+    
+    public static final String PARAM_POST_TID_CONSTANT = "params[post][tid]";
 
     public static final String PARAM_TOPIC_UID_CONSTANT = "params[topic][uid]";
+    
+    public static final String PARAM_POST_UID_CONSTANT = "params[post][uid]";
 
     public static final String PARAM_CONTENT_CONSTANT = "params[content]";
+    
+    public static final String PARAM_POST_CONTENT_CONSTANT = "params[post][content]";
+    
+    public static final String PARAM_POST_TOPID_CONSTANT = "params[post][toPid]";
 
     public static final String PARAM_UID = "params[uid]";
 
@@ -76,4 +92,8 @@ public class Constants {
     public static final String POSTERS_CONSTANT = "posters";
 
     public static final String TID_CONSTANTS = "tid";
+    
+    public static final String LISTENERS = "listeners";
+    
+    public static final String EXTRA_DOTS = "...";
 }

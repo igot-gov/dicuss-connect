@@ -3,7 +3,12 @@ package com.eagle.hubnotifier.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @Component
+@Getter
+@Setter
 public class Configuration {
 
     @Value("${notify.service.host}")
@@ -29,29 +34,11 @@ public class Configuration {
 
     @Value("${hub.service.get.path}")
     private String hubServiceGetPath;
-
-    public String getNotifyServiceHost() {
-        return notifyServiceHost;
-    }
-
-    public String getNotifyServicePath() {
-        return notifyServicePath;
-    }
-
-    public String getNotifyTopic() {
-        return notifyTopic;
-    }
-
-    public String getHubRootOrg() {
-        return hubRootOrg;
-    }
-
-    public String getHubServiceHost() {return hubServiceHost;}
-
-    public String getDiscussionCreateUrl() {return discussionCreateUrl;}
-
-    public String getHubServiceGetPath() {return hubServiceGetPath;}
-
-    public String getTopicSearchPath() {return topicSearchPath;}
+    
+    @Value("${topic.reply.max.length}")
+    private int topicReplyMaxLength;
+    
+    @Value("${topic.title.max.length}")
+    private int topicTitleMaxLength;
 
 }
