@@ -35,6 +35,12 @@ public class Configuration {
 	@Value("${hub.service.get.path}")
 	private String hubServiceGetPath;
 
+	@Value("${topic.reply.max.length}")
+	private int topicReplyMaxLength;
+
+	@Value("${topic.title.max.length}")
+	private int topicTitleMaxLength;
+
 	@Value("${telemetry.service.host}")
 	private String telemetryServiceHost;
 
@@ -46,7 +52,7 @@ public class Configuration {
 
 	@Value("${telemetry.version}")
 	private String telemetryVersion;
-	
+
 	@Value("${telemetry.event.version}")
 	private String telemetryEventVerion;
 
