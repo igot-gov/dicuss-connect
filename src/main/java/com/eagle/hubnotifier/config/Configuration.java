@@ -91,4 +91,7 @@ public class Configuration {
 
 	@Value("${telemetry.context.pdata.pid}")
 	private String telemetryContextPDataPid;
+
+	@Value("${telemetry.edata.tag.target}")
+	private String telemetryEDataTagTarget;
 }

@@ -106,4 +106,8 @@ public class Constants {
 	public static final String LISTENERS = "listeners";
 	
 	public static final String EXTRA_DOTS = "...";
+
+	public static final String TAG_PREFIX_CONSTANT= "params[data][tags][";
+
+	public static final String CLOSING_TAG= "]";
 }

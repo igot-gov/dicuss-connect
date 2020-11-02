@@ -23,6 +23,7 @@ import com.eagle.hubnotifier.telemetry.model.TelemetryData;
 import com.eagle.hubnotifier.telemetry.service.TelemetryService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.util.ObjectUtils;
 
 @Service
 public class TelemetryServiceImpl implements TelemetryService {
@@ -39,6 +40,9 @@ public class TelemetryServiceImpl implements TelemetryService {
 
 	@Autowired
 	private CategoryCacheManager categoryCacheManager;
+
+	@Autowired
+	private ObjectMapper mapper;
 
 	@Override
 	public void handleNotifyKafkaTopicRequest(Map<String, Object> data) {
@@ -57,34 +61,33 @@ public class TelemetryServiceImpl implements TelemetryService {
 
 				boolean notificationEnabledForEvent = true;
 				switch (hook) {
-				case Constants.FILTER_TOPIC_CREATE:
-					handleTopicCreate(data, tData);
-					break;
-				case Constants.FILTER_POST_CREATE:
-					handlePostCreate(data, tData);
-					break;
-				case Constants.FILTER_TOPIC_REPLY:
-					handleTopicReplyEvent(data, tData);
-					break;
-				case Constants.ACTION_POST_UPVOTE:
-					handleTopicUpvoteEvent(data, tData);
-					break;
-				case Constants.ACTION_POST_DOWNVOTE:
-					handleTopicDownVoteEvent(data, tData);
-					break;
-				default:
-					notificationEnabledForEvent = false;
-					break;
+					case Constants.FILTER_TOPIC_CREATE:
+						handleTopicCreate(data, tData);
+						break;
+					case Constants.FILTER_POST_CREATE:
+						handlePostCreate(data, tData);
+						break;
+					case Constants.FILTER_TOPIC_REPLY:
+						handleTopicReplyEvent(data, tData);
+						break;
+					case Constants.ACTION_POST_UPVOTE:
+						handleTopicUpvoteEvent(data, tData);
+						break;
+					case Constants.ACTION_POST_DOWNVOTE:
+						handleTopicDownVoteEvent(data, tData);
+						break;
+					default:
+						notificationEnabledForEvent = false;
+						break;
 				}
 				if (notificationEnabledForEvent) {
-					sendNotification(tData);
+					postTelemetryData(tData);
 				}
 			}
 		}
 	}
 
 	private void handleTopicCreate(Map<String, Object> data, TelemetryData tData) {
-
 		EData eData = EData.builder().id(config.getTelemetryEDataId()).type(config.getTelemetryEDataCreateType())
 				.target(config.getTelemetryEDataTopicTarget())
 				.pageid(config.getDiscussionCreateUrl() + getTopicId(data, Constants.PARAM_TOPIC_TID_CONSTANT))
@@ -95,7 +98,7 @@ public class TelemetryServiceImpl implements TelemetryService {
 		tData.getEvent().setActor(Actor.builder().id(getUserName(data, Constants.PARAM_TOPIC_UID_CONSTANT))
 				.type(Constants.USER_ROLE).build());
 		tData.getEvent().setEid(config.getTelemetryEventEidInteract());
-
+		handleTagCreateEvent(data);
 		logger.info("Created TelemetryData: {}", tData);
 	}
 
@@ -121,6 +124,45 @@ public class TelemetryServiceImpl implements TelemetryService {
 
 	private void handleTopicDownVoteEvent(Map<String, Object> data, TelemetryData tData) {
 
+	}
+
+	private void handleTagCreateEvent(Map<String, Object> data) {
+		TelemetryData tData = createTelemetryData();
+		if (ObjectUtils.isEmpty(data.get(Constants.TAG_PREFIX_CONSTANT + 0 + Constants.CLOSING_TAG)))
+			return;
+		EData eData = EData.builder().id(config.getTelemetryEDataId()).type(config.getTelemetryEDataCreateType())
+				.target(config.getTelemetryEDataTagTarget())
+				.pageid(config.getDiscussionCreateUrl() + getTopicId(data, Constants.PARAM_TOPIC_TID_CONSTANT))
+				.topicName(getTopicTitle(data, Constants.PARAM_TOPIC_TITLE_CONSTANT))
+				.categoryName(getCategoryName(data)).build();
+		tData.getEvent().setEData(eData);
+		tData.getEvent().setActor(Actor.builder().id(getUserName(data, Constants.PARAM_TOPIC_UID_CONSTANT))
+				.type(Constants.USER_ROLE).build());
+		tData.getEvent().setTags(getTagList(data));
+		tData.getEvent().setEid(config.getTelemetryEventEidInteract());
+		try {
+			logger.info("Created TelemetryData: {}", mapper.writeValueAsString(tData));
+		} catch (JsonProcessingException e) {
+			logger.error("Exception occurred while writing the data into string");
+		}
+		postTelemetryData(tData);
+	}
+
+	/**
+	 *
+	 * @param data
+	 * @return Tag list from received data
+	 */
+	private List<String> getTagList(Map<String, Object> data) {
+		List<String> taglist = new ArrayList<>();
+		int i = 0;
+		while (i >= 0) {
+			if (ObjectUtils.isEmpty(data.get(Constants.TAG_PREFIX_CONSTANT + i + Constants.CLOSING_TAG)))
+				break;
+			taglist.add(((List<String>) data.get(Constants.TAG_PREFIX_CONSTANT + i + Constants.CLOSING_TAG)).get(0));
+			i++;
+		}
+		return taglist;
 	}
 
 	private TelemetryData createTelemetryData() {
@@ -175,7 +217,7 @@ public class TelemetryServiceImpl implements TelemetryService {
 	 * @param tData
 	 * @throws Exception
 	 */
-	public void sendNotification(TelemetryData tData) {
+	public void postTelemetryData(TelemetryData tData) {
 		StringBuilder builder = new StringBuilder();
 		builder.append(config.getTelemetryServiceHost()).append(config.getTelemetryServicePath());
 		try {
