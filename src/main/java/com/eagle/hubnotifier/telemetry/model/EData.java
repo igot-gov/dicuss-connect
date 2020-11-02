@@ -8,20 +8,22 @@ import lombok.Setter;
 @Setter
 @Builder
 public class EData {
-	private String id;
-	private String type;
-	private String pageid;
-	private String target;
-	private String topicName;
-	private String categoryName;
+    private String id;
+    private String type;
+    private String subType;
+    private String pageid;
+    private String target;
+    private String topicName;
+    private String categoryName;
 
-	public String toString() {
-		StringBuilder str = new StringBuilder("id:");
-		str.append(id);
-		str.append(",type:").append(type).append(",pageid:").append(pageid);
-		str.append(",target:").append(target).append(",topicName:").append(topicName);
-		str.append(",categoryName:").append(categoryName);
+    public String toString() {
+        StringBuilder str = new StringBuilder("id:");
+        str.append(id);
+        str.append(",type:").append(type).append(",subType:").append(subType)
+                .append(",pageid:").append(pageid);
+        str.append(",target:").append(target).append(",topicName:").append(topicName);
+        str.append(",categoryName:").append(categoryName);
 
-		return str.toString();
-	}
+        return str.toString();
+    }
 }

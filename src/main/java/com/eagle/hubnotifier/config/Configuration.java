@@ -94,4 +94,13 @@ public class Configuration {
 
 	@Value("${telemetry.edata.tag.target}")
 	private String telemetryEDataTagTarget;
+
+	@Value("${telemetry.edata.other.type}")
+	private String telemetryEdataOtherType;
+
+	@Value("${telemetry.edata.upvote.type}")
+	private String telemetryEdataUpvoteType;
+
+	@Value("${telemetry.edata.downvote.type}")
+	private String telemetryEdataDownvoteType;
 }

@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.eagle.hubnotifier.model.HubPost;
+import com.eagle.hubnotifier.model.HubTopic;
+import com.eagle.hubnotifier.repository.HubPostRepository;
+import com.eagle.hubnotifier.repository.HubTopicRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +47,12 @@ public class TelemetryServiceImpl implements TelemetryService {
 
 	@Autowired
 	private ObjectMapper mapper;
+
+	@Autowired
+	private HubPostRepository hubPostRepository;
+
+	@Autowired
+	private HubTopicRepository hubTopicRepository;
 
 	@Override
 	public void handleNotifyKafkaTopicRequest(Map<String, Object> data) {
@@ -118,14 +128,66 @@ public class TelemetryServiceImpl implements TelemetryService {
 
 	}
 
+	/**
+	 * Construct TelemeterData
+	 * @param data event data
+	 * @param tData telemetry object
+	 */
+	@SuppressWarnings("unchecked")
 	private void handleTopicUpvoteEvent(Map<String, Object> data, TelemetryData tData) {
-
+		HubPost hubPost = hubPostRepository.findByKey(Constants.POST_ROLE + ":" + ((List<String>) data.get(Constants.PARAMS_PID)).get(0));
+		HubTopic topic = hubTopicRepository.findByKey(Constants.TOPIC_KEY + hubPost.getTid());
+		String userId = ((List<String>) data.get(Constants.PARAM_UID)).get(0);
+		HubUser user = userRepository.findByKey(Constants.USER_ROLE + ":" + userId);
+		EData eData = EData.builder().id(config.getTelemetryEDataId()).type(config.getTelemetryEdataOtherType())
+				.subType(config.getTelemetryEdataUpvoteType())
+				.target(config.getTelemetryEDataPostTarget())
+				.pageid(config.getDiscussionCreateUrl() + hubPost.getTid())
+				.topicName(topic.getTitle())
+				.categoryName(getCategoryName(topic.getCid())).build();
+		tData.getEvent().setEData(eData);
+		tData.getEvent().setActor(Actor.builder().id(user.getUsername())
+				.type(Constants.USER_ROLE).build());
+		tData.getEvent().setEid(config.getTelemetryEventEidInteract());
+		try {
+			logger.info("Created TelemetryData: {}", mapper.writeValueAsString(tData));
+		} catch (JsonProcessingException e) {
+			logger.error("Exception occurred while writing the data into string");
+		}
 	}
 
+	/**
+	 * Construct TelemeterData
+	 * @param data event data
+	 * @param tData telemetry object
+	 */
 	private void handleTopicDownVoteEvent(Map<String, Object> data, TelemetryData tData) {
-
+		HubPost hubPost = hubPostRepository.findByKey(Constants.POST_ROLE + ":" + ((List<String>) data.get(Constants.PARAMS_PID)).get(0));
+		HubTopic topic = hubTopicRepository.findByKey(Constants.TOPIC_KEY + hubPost.getTid());
+		String userId = ((List<String>) data.get(Constants.PARAM_UID)).get(0);
+		HubUser user = userRepository.findByKey(Constants.USER_ROLE + ":" + userId);
+		EData eData = EData.builder().id(config.getTelemetryEDataId()).type(config.getTelemetryEdataOtherType())
+				.subType(config.getTelemetryEdataDownvoteType())
+				.target(config.getTelemetryEDataPostTarget())
+				.pageid(config.getDiscussionCreateUrl() + hubPost.getTid())
+				.topicName(topic.getTitle())
+				.categoryName(getCategoryName(topic.getCid())).build();
+		tData.getEvent().setEData(eData);
+		tData.getEvent().setActor(Actor.builder().id(user.getUsername())
+				.type(Constants.USER_ROLE).build());
+		tData.getEvent().setEid(config.getTelemetryEventEidInteract());
+		try {
+			logger.info("Created TelemetryData: {}", mapper.writeValueAsString(tData));
+		} catch (JsonProcessingException e) {
+			logger.error("Exception occurred while writing the data into string");
+		}
 	}
 
+	/**
+	 * Send telemetry data
+	 *
+	 * @param data Event received
+	 */
 	private void handleTagCreateEvent(Map<String, Object> data) {
 		TelemetryData tData = createTelemetryData();
 		if (ObjectUtils.isEmpty(data.get(Constants.TAG_PREFIX_CONSTANT + 0 + Constants.CLOSING_TAG)))
@@ -195,6 +257,11 @@ public class TelemetryServiceImpl implements TelemetryService {
 	private String getCategoryName(Map<String, Object> data) {
 		return categoryCacheManager
 				.getCategoryName(Integer.parseInt(((List<String>) data.get(Constants.PARAM_POST_CID_CONSTANT)).get(0)));
+	}
+
+	private String getCategoryName(Long cid) {
+		return categoryCacheManager
+				.getCategoryName(Math.toIntExact(cid));
 	}
 
 	private String getTopicId(Map<String, Object> data, String key) {
