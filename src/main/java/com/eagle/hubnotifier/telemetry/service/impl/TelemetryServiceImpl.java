@@ -68,7 +68,6 @@ public class TelemetryServiceImpl implements TelemetryService {
 		if (hookList != null) {
 			for (String hook : hookList) {
 				TelemetryData tData = createTelemetryData();
-
 				boolean notificationEnabledForEvent = true;
 				switch (hook) {
 					case Constants.FILTER_TOPIC_CREATE:
@@ -125,7 +124,17 @@ public class TelemetryServiceImpl implements TelemetryService {
 	}
 
 	private void handleTopicReplyEvent(Map<String, Object> data, TelemetryData tData) {
-
+		String topicId = getTopicId(data, Constants.PARAM_TID);
+		HubTopic topic = hubTopicRepository.findByKey(Constants.TOPIC_KEY + topicId);
+		EData eData = EData.builder().id(config.getTelemetryEDataId()).type(config.getTelemetryEDataCreateType())
+				.target(config.getTelemetryEDataPostTarget())
+				.pageid(config.getDiscussionCreateUrl() + topicId)
+				.topicName(topic.getTitle()).categoryName(getCategoryName(topic.getCid()))
+				.build();
+		tData.getEvent().setEData(eData);
+		tData.getEvent().setActor(Actor.builder().id(getUserName(data, Constants.PARAM_UID))
+				.type(Constants.USER_ROLE).build());
+		tData.getEvent().setEid(config.getTelemetryEventEidImpression());
 	}
 
 	/**
