@@ -19,6 +19,8 @@ public class Constants {
 
 	public static final String ACTION_POST_DOWNVOTE = "action:post.downvote";
 
+	public static final String FILTER_TOPIC_GET = "filter:topic.get";
+
 	public static final String DISCUSSION_CREATION_EVENT_ID = "discussion_creation";
 
 	public static final String DISCUSSION_CREATION_TOPIC_TAG = "#discussionTopic";

@@ -85,6 +85,9 @@ public class TelemetryServiceImpl implements TelemetryService {
 					case Constants.ACTION_POST_DOWNVOTE:
 						handleTopicDownVoteEvent(data, tData);
 						break;
+					case Constants.FILTER_TOPIC_GET:
+						hadleTopicViewEvent(data, tData);
+						break;
 					default:
 						notificationEnabledForEvent = false;
 						break;
@@ -190,6 +193,21 @@ public class TelemetryServiceImpl implements TelemetryService {
 		} catch (JsonProcessingException e) {
 			logger.error("Exception occurred while writing the data into string");
 		}
+	}
+
+	private void hadleTopicViewEvent(Map<String, Object> data, TelemetryData tData){
+		String cid = ((List<String>)data.get(Constants.PARAM_TOPIC_CID_CONSTANT)).get(0);
+		EData eData = EData.builder().id(config.getTelemetryEDataId()).type(config.getTelemetryEdataViewType())
+				.target(config.getTelemetryEDataTopicTarget())
+				.pageid(config.getDiscussionCreateUrl() + getTopicId(data, Constants.PARAM_TOPIC_TID_CONSTANT))
+				.topicName(getTopicTitle(data, Constants.PARAM_TOPIC_TITLE_CONSTANT))
+				.categoryName(getCategoryName(Long.parseLong(cid))).build();
+		tData.getEvent().setEData(eData);
+		tData.getEvent().setActor(Actor.builder().id(getUserName(data, Constants.PARAM_UID))
+				.type(Constants.USER_ROLE).build());
+		tData.getEvent().setEid(config.getTelemetryEventEidInteract());
+		handleTagCreateEvent(data);
+		logger.info("Created TelemetryData: {}", tData);
 	}
 
 	/**
