@@ -106,7 +106,8 @@ public class NotifyHookServiceImpl implements NotifyHookService {
 		Map<String, Object> tagValues = new HashMap<>();
 
 		Map<String, List<String>> recipients = new HashMap<>();
-		HubUser topicCreator, currentPostCreator;
+		HubUser topicCreator;
+		HubUser currentPostCreator;
 
 		String currentPostCreatorUid = ((List<String>) data.get(Constants.PARAM_POST_UID_CONSTANT)).get(0);
 		String topicId = ((List<String>) data.get(Constants.PARAM_POST_TID_CONSTANT)).get(0);
@@ -127,7 +128,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
 		tagValues.put(Constants.DISCUSSION_CREATION_TARGET_URL, configuration.getDiscussionCreateUrl() + topicId);
 
 		HubTopic topic = getTopicDetails(topicId);
-		List<String> authorList = new ArrayList<String>(2);
+		List<String> authorList = new ArrayList<>(2);
 		if (topic != null) {
 			String topicTitle = topic.getTitle();
 			if (topicTitle.length() > configuration.getTopicTitleMaxLength()) {
@@ -220,8 +221,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
 				hubUserMap.get(Constants.USER_ROLE + ":" + hubPost.getUid()).getUsername(),
 				hubUserMap.get(Constants.USER_ROLE + ":" + ((List<String>) data.get(Constants.PARAM_UID)).get(0))
 						.getUsername());
-		recipients.put(Constants.AUTHOR_ROLE,
-				Arrays.asList(hubUserMap.get(Constants.USER_ROLE + ":" + hubPost.getUid()).getUsername()));
+		recipients.put(Constants.AUTHOR_ROLE, watchersList);
 		recipients.put(Constants.DOWNVOTE_BY, Arrays.asList(hubUserMap
 				.get(Constants.USER_ROLE + ":" + ((List<String>) data.get(Constants.PARAM_UID)).get(0)).getUsername()));
 		nEvent.setTagValues(tagValues);
@@ -237,7 +237,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
 	public List<String> getWatchersList(String tid) {
 		List<TopicPoster> hubPosters = topicPostersRepositoy
 				.findByKey(Constants.TID_CONSTANTS + ":" + tid + ":" + Constants.POSTERS_CONSTANT);
-		List<String> postersUUId = hubPosters.stream().map(poster -> poster.getValue()).collect(Collectors.toList());
+		List<String> postersUUId = hubPosters.stream().map(TopicPoster::getValue).collect(Collectors.toList());
 		TopicFollower followers = topicFollowerRepository
 				.findByKey(Constants.TID_CONSTANTS + ":" + tid + ":" + Constants.FOLLOWERS_CONSTANT);
 		List<String> followersUUId = new ArrayList<>();
@@ -260,7 +260,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
 		}
 		List<HubUser> userList = userRepository.findByUUIDS(userRoleIds);
 		if (!CollectionUtils.isEmpty(userList)) {
-			watchersUserName = userList.stream().map(user -> user.getUsername()).collect(Collectors.toList());
+			watchersUserName = userList.stream().map(HubUser::getUsername).collect(Collectors.toList());
 		}
 		return watchersUserName;
 	}

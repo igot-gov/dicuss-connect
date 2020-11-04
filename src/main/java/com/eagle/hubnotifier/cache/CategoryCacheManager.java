@@ -20,7 +20,7 @@ import com.eagle.hubnotifier.repository.HubCategoryRepository;
 public class CategoryCacheManager {
 
 	// Singleton Instance
-	private static volatile CategoryCacheManager cacheManager;
+	private static CategoryCacheManager cacheManager;
 
 	// Map to store the Category details
 	private Map<Integer, String> categoryMap = null;
@@ -33,7 +33,7 @@ public class CategoryCacheManager {
 	 * Private constructor to avoid duplicate object creation
 	 */
 	private CategoryCacheManager() {
-		categoryMap = new HashMap<Integer, String>(5);
+		categoryMap = new HashMap<>(5);
 	}
 
 	/**

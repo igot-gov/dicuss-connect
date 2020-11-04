@@ -26,7 +26,7 @@ public class Event {
 		if (context != null) {
 			str.append("},context:{").append(context);
 		}
-		if (tags != null && tags.size() > 0) {
+		if (tags != null && !tags.isEmpty()) {
 			str.append("},tags:[");
 			str.append(tags.toString());
 		}

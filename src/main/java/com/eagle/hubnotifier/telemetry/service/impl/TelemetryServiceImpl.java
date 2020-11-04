@@ -33,6 +33,10 @@ import org.springframework.util.ObjectUtils;
 public class TelemetryServiceImpl implements TelemetryService {
 	Logger logger = LogManager.getLogger(TelemetryServiceImpl.class);
 
+	public static final String CREATED_TELEMETRY_DATA_CONST = "Created TelemetryData: {}";
+
+	public static final String EXCEPTION_STRING = "Exception occurred while writing the data into string";
+
 	@Autowired
 	private Configuration config;
 
@@ -57,7 +61,6 @@ public class TelemetryServiceImpl implements TelemetryService {
 	@Override
 	public void handleNotifyKafkaTopicRequest(Map<String, Object> data) {
 		logger.info("Recived request from Topic Consumer");
-		ObjectMapper mapper = new ObjectMapper();
 		try {
 			String message = mapper.writeValueAsString(data);
 			logger.info("Received Data : {}", message);
@@ -111,7 +114,7 @@ public class TelemetryServiceImpl implements TelemetryService {
 				.type(Constants.USER_ROLE).build());
 		tData.getEvent().setEid(config.getTelemetryEventEidInteract());
 		handleTagCreateEvent(data);
-		logger.info("Created TelemetryData: {}", tData);
+		logger.info(CREATED_TELEMETRY_DATA_CONST, tData);
 	}
 
 	private void handlePostCreate(Map<String, Object> data, TelemetryData tData) {
@@ -163,9 +166,9 @@ public class TelemetryServiceImpl implements TelemetryService {
 				.type(Constants.USER_ROLE).build());
 		tData.getEvent().setEid(config.getTelemetryEventEidInteract());
 		try {
-			logger.info("Created TelemetryData: {}", mapper.writeValueAsString(tData));
+			logger.info(CREATED_TELEMETRY_DATA_CONST, mapper.writeValueAsString(tData));
 		} catch (JsonProcessingException e) {
-			logger.error("Exception occurred while writing the data into string");
+			logger.error(EXCEPTION_STRING);
 		}
 	}
 
@@ -190,9 +193,9 @@ public class TelemetryServiceImpl implements TelemetryService {
 				.type(Constants.USER_ROLE).build());
 		tData.getEvent().setEid(config.getTelemetryEventEidInteract());
 		try {
-			logger.info("Created TelemetryData: {}", mapper.writeValueAsString(tData));
+			logger.info(CREATED_TELEMETRY_DATA_CONST, mapper.writeValueAsString(tData));
 		} catch (JsonProcessingException e) {
-			logger.error("Exception occurred while writing the data into string");
+			logger.error(EXCEPTION_STRING);
 		}
 	}
 
@@ -208,7 +211,7 @@ public class TelemetryServiceImpl implements TelemetryService {
 				.type(Constants.USER_ROLE).build());
 		tData.getEvent().setEid(config.getTelemetryEventEidInteract());
 		handleTagCreateEvent(data);
-		logger.info("Created TelemetryData: {}", tData);
+		logger.info(CREATED_TELEMETRY_DATA_CONST, tData);
 	}
 
 	/**
@@ -231,9 +234,9 @@ public class TelemetryServiceImpl implements TelemetryService {
 		tData.getEvent().setTags(getTagList(data));
 		tData.getEvent().setEid(config.getTelemetryEventEidInteract());
 		try {
-			logger.info("Created TelemetryData: {}", mapper.writeValueAsString(tData));
+			logger.info(CREATED_TELEMETRY_DATA_CONST, mapper.writeValueAsString(tData));
 		} catch (JsonProcessingException e) {
-			logger.error("Exception occurred while writing the data into string");
+			logger.error(EXCEPTION_STRING);
 		}
 		postTelemetryData(tData);
 	}
@@ -260,7 +263,7 @@ public class TelemetryServiceImpl implements TelemetryService {
 		tData.setId(config.getTelemetryId());
 		tData.setVer(config.getTelemetryVersion());
 		tData.setEts(System.currentTimeMillis());
-		List<Event> events = new ArrayList<Event>();
+		List<Event> events = new ArrayList<>();
 		Event event = new Event();
 		event.setVer(config.getTelemetryEventVerion());
 		event.setEts(System.currentTimeMillis());
@@ -269,10 +272,8 @@ public class TelemetryServiceImpl implements TelemetryService {
 		context.setChannel(config.getTelemetryContextChannel());
 		context.setEnv(config.getTelemetryContextEnv());
 
-		// TODO - Create a random string to cover the session id
 		context.setSid("");
-
-		// TODO - create a uuid for the did value
+		
 		context.setDid("");
 		event.setContext(context);
 
