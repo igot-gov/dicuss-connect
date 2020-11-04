@@ -123,7 +123,7 @@ public class NotifyHookServiceImpl implements NotifyHookService {
 		}
 		tagValues.put(Constants.REPLY_TAG, replyText);
 		tagValues.put(Constants.COMMENTED_BY_NAME_TAG, currentPostCreator.getUsername());
-		recipients.put(Constants.COMMENTER_ROLE, Arrays.asList(currentPostCreator.getUsername()));
+		recipients.put(Constants.COMMENTED_BY_TAG, Arrays.asList(currentPostCreator.getUsername()));
 		tagValues.put(Constants.DISCUSSION_CREATION_TARGET_URL, configuration.getDiscussionCreateUrl() + topicId);
 
 		HubTopic topic = getTopicDetails(topicId);
