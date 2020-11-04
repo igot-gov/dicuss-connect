@@ -28,7 +28,7 @@ public class NotifyHookConsumer {
         Map<String, Object> objectMap;
         try {
             objectMap = mapper.readValue(message, Map.class);
-            //notifyHook.handleNotifyKafkaTopicRequest(objectMap);
+            notifyHook.handleNotifyKafkaTopicRequest(objectMap);
         } catch (Exception ex) {
             logger.error("Error while deserialization the object value", ex);
         }

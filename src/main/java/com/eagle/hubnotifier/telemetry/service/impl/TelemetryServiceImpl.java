@@ -115,10 +115,11 @@ public class TelemetryServiceImpl implements TelemetryService {
 	}
 
 	private void handlePostCreate(Map<String, Object> data, TelemetryData tData) {
+		HubTopic topic = hubTopicRepository.findByKey(Constants.TOPIC_KEY + getTopicId(data, Constants.PARAM_POST_TID_CONSTANT));
 		EData eData = EData.builder().id(config.getTelemetryEDataId()).type(config.getTelemetryEDataCreateType())
 				.target(config.getTelemetryEDataPostTarget())
 				.pageid(config.getDiscussionCreateUrl() + getTopicId(data, Constants.PARAM_POST_TID_CONSTANT))
-				.topicName(getTopicTitle(data, Constants.PARAM_POST_TOPIC_TITLE)).categoryName(getCategoryName(data))
+				.topicName(topic.getTitle()).categoryName(getCategoryName(data))
 				.build();
 		tData.getEvent().setEData(eData);
 		tData.getEvent().setActor(Actor.builder().id(getUserName(data, Constants.PARAM_POST_UID_CONSTANT))
