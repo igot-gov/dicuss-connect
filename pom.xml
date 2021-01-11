@@ -9,7 +9,7 @@
 		<version>2.1.17.RELEASE</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.eagle</groupId>
+	<groupId>org.sunbird</groupId>
 	<artifactId>hub-notification-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>hub-notification-service</name>
